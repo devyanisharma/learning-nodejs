@@ -65,6 +65,25 @@ module.exports = {
                 "message": "forbidden request",
             });
         }
+    },
+
+    partialDetailUpdateController: function(req,res,next){
+        const originalUser = req.originalUser;
+        //console.log(originalUser);
+        const reqBody = req.body;
+        const data= userService.partialDetailUpdateService(originalUser,reqBody);
+        if(data.message =="success"){
+            res.status(200).json({
+                "message":"partial data updated successfully",
+                "user":data.user
+            })
+        }else{
+            res.status(400).json({
+                "message":"Bad request"
+            })
+        }
     }
+
+   
 
 }

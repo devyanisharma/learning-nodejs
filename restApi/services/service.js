@@ -17,6 +17,10 @@ module.exports =
 
     deleteUserService: function (id) {
         return dataStore.deleteUser(id);
+    },
+
+    partialDetailUpdateService: function(id,reqBody){
+        return dataStore.partialDetailUpdate(id,reqBody);
     }
 
 

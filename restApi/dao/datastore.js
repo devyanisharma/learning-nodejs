@@ -66,7 +66,16 @@ let dataStore = {
         }
         return data;
 
-    }
+    },
+
+    partialDetailUpdate: function(originalUser,patchObject){
+        Object.assign(originalUser, patchObject);
+        const data= {
+            "message":"success",
+            "user":originalUser
+        }
+        return data;
+     }
 
 
 }
