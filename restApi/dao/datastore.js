@@ -1,10 +1,23 @@
 let dataStore = {
-    userData: [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com" },
-    { userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com" }],
+    //userData:[],
+     userData: [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com" },
+     { userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com" }],
 
 
     getAllUserData: function () {
-        return this.userData;
+        if(this.userData.length>=1){
+            const data = {
+                "message": "success",
+                "user": this.userData
+            }
+            return data;
+        } else {
+            const data = {
+                "message": "error"
+            }
+            return data; 
+        }
+        
     },
 
     postUserData: function (name, age, email) {
@@ -49,33 +62,37 @@ let dataStore = {
     },
 
     deleteUser: function (id) {
-        for (let i = 0; i <= this.userData.length; i++) {
+        for (let i = 0; i < this.userData.length; i++) {
             if (this.userData[i].userId == id) {
+                const leftArray = this.userData.slice(0,i);
+                const rightArray = this.userData.slice(i+1,this.userData.length);
+                 const Arrry = leftArray.concat(rightArray);
+                 this.userData = Arrry;
+
                 const data = {
                     "message": "success",
                     "user": this.userData[i]
                 }
-                this.userData.pop(this.userData[i])
                 return data;
-                
             }
-
         }
         const data = {
+            "id": id,
             "message": "error"
         }
         return data;
 
+   
     },
 
-    partialDetailUpdate: function(originalUser,patchObject){
+    partialDetailUpdate: function (originalUser, patchObject) {
         Object.assign(originalUser, patchObject);
-        const data= {
-            "message":"success",
-            "user":originalUser
+        const data = {
+            "message": "success",
+            "user": originalUser
         }
         return data;
-     }
+    }
 
 
 }

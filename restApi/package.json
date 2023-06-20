@@ -4,7 +4,7 @@
   "description": "rest api implementation crud operation",
   "main": "app.js",
   "scripts": {
-    "test": "jest routes.test.js",
+    "test": "jest dataStore.test.js",
     "start": "nodemon server.js"
   },
   "repository": {
