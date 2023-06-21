@@ -1,11 +1,11 @@
 let dataStore = {
     //userData:[],
-     userData: [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com" },
-     { userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com" }],
+    userData: [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com" },
+    { userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com" }],
 
 
     getAllUserData: function () {
-        if(this.userData.length>=1){
+        if (this.userData.length >= 1) {
             const data = {
                 "message": "success",
                 "user": this.userData
@@ -15,9 +15,9 @@ let dataStore = {
             const data = {
                 "message": "error"
             }
-            return data; 
+            return data;
         }
-        
+
     },
 
     postUserData: function (name, age, email) {
@@ -64,14 +64,14 @@ let dataStore = {
     deleteUser: function (id) {
         for (let i = 0; i < this.userData.length; i++) {
             if (this.userData[i].userId == id) {
-                const leftArray = this.userData.slice(0,i);
-                const rightArray = this.userData.slice(i+1,this.userData.length);
-                 const Arrry = leftArray.concat(rightArray);
-                 this.userData = Arrry;
+                const leftArray = this.userData.slice(0, i);
+                const rightArray = this.userData.slice(i + 1, this.userData.length);
+                const Arrry = leftArray.concat(rightArray);
+                this.userData = Arrry;
 
                 const data = {
                     "message": "success",
-                    "user": this.userData[i]
+                    "user": Arrry
                 }
                 return data;
             }
@@ -82,7 +82,7 @@ let dataStore = {
         }
         return data;
 
-   
+
     },
 
     partialDetailUpdate: function (originalUser, patchObject) {

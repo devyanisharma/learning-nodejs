@@ -84,12 +84,15 @@ module.exports = {
 
     deleteUserController: function (req, res, next) {
         const id = req.params.id;
+        
         const data = userService.deleteUserService(id);
+        
         if (data.message == "success") {
             res.status(200).json({
                 "message": "user deleted successfully",
                 "user": data.user
             });
+
         } else if (data.message == "error") {
             res.status(401).json({
                 "message": "User not found",
