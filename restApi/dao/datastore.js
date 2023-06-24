@@ -2,6 +2,7 @@ let dataStore = {
     //userData:[],
     userData: [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com" },
     { userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com" }],
+    useDetail:[{userId:99, userImage: 'image.jpeg'}],
 
 
     getAllUserData: function () {
@@ -92,6 +93,24 @@ let dataStore = {
             "user": originalUser
         }
         return data;
+    },
+
+    uploadUserImageService: function(userId){
+        if(true){
+            const data = {
+            "message": "success",
+            "user": user
+        }
+        return data;
+    }else{
+        const data = {
+            "message": "error"
+        }
+        return data;
+    }
+        
+
+
     }
 
 

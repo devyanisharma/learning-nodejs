@@ -2,18 +2,52 @@ const express = require('express');
 console.log("HI");
 const app = express();
 const http = require('http');
-const { userInfo } = require('os');
+
 const port = 5000
 const server = http.createServer(app)
 server.listen(port, () => {
     console.log(`Listening on ${port}`)
 });
-app.use(express.json());//it is a middleware used to parse request body(request body is in json format)
-app.use(middleware);//attaching middleware
+
+//app.use(express.json());//it is a middleware used to parse request body(request body is in json format)
+const multer = require('multer')
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads')
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname)
+    }
+})
+
+//const upload = multer({ storage: storage })
+const upload = multer()
 
 
 let userData = [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com" },
 { userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com" }];
+
+// app.post('/profileImg', upload.single('image'), function (req, res, next) {
+//     console.log(req.file);
+//     res.send('upload successfully')
+// })
+
+// app.post('/multipleImg', upload.array('photos', 3), function (req, res, next) {
+//     console.log(req.files)
+//     res.send('multiple upload successfully')
+// })
+
+// const images = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'photos', maxCount: 8 }])
+// app.post('/images', images, function (req, res, next) {
+//     console.log(req.files)
+//     res.send('All images upload successfully')
+// })
+
+app.post('/profile', upload.none(), function (req, res, next) {
+    console.log(req.file);
+    res.send('upload successfully')
+  })
+
 
 app.get('/api/users', (req, res, next) => {
     res.status(200).json(getUser());
@@ -62,7 +96,7 @@ app.patch('/api/users/:id', patchValidationMiddleware, (req, res, next) => {
     const originalUser = req.originalUser;
     console.log(originalUser);
     const patchObject = req.body;
-    partialUpdate(originalUser,patchObject);
+    partialUpdate(originalUser, patchObject);
     res.status(201).json({
         "message": "partially updated successfully"
     })
@@ -105,10 +139,11 @@ function update(id, name, age, email) {
 
 }
 
-function partialUpdate(originalUser,patchObject){
+function partialUpdate(originalUser, patchObject) {
 
     Object.assign(originalUser, patchObject);
 }
+
 function deleteUser(id) {
     for (let i = 0; i < userData.length; i++) {
         if (userData[i].userId == id) {
@@ -131,9 +166,10 @@ function patchValidationMiddleware(req, res, next) {
     const patchObject = req.body;
     for (var key in patchObject) {
         if (!originalUser.hasOwnProperty(key)) {
-            return res.status(401).json({
-                "message": "incorrect id"
-            })
+            const data = {
+                "message": "error"
+            }
+            return data;
         }
     }
     req.originalUser = originalUser;
@@ -144,13 +180,13 @@ function patchValidationMiddleware(req, res, next) {
 
 
 
-app.patch('/api/user',middleware,(req,res,next)=>{
+app.patch('/api/user', middleware, (req, res, next) => {
 
 })
 
-function middleware(req,res,next){
+function middleware(req, res, next) {
     return res.status(401).json({
-        "message":"bad request"
+        "message": "bad request"
     })
     next();
 }

@@ -21,6 +21,10 @@ module.exports =
 
     deleteUserService: function (id) {
         return dataStore.deleteUser(id);
+    },
+
+    uploadUserImageService: function(userId){
+        return dataStore.uploadUserImage(userId);
     }
 
 

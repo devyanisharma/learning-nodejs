@@ -20,5 +20,11 @@ module.exports = {
         }
         req.originalUser = originalUser;
         next();
+    },
+
+    imageValidationMiddleware: function(req,res,next){
+        const userId= req.params.id;
+        
+
     }
 }
