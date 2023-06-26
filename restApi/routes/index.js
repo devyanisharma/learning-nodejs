@@ -9,6 +9,7 @@ router.post('/',userController.postUserController);
 router.put('/:id',userController.updateUserDetailController);
 router.delete('/:id',userController.deleteUserController);
 router.patch('/:id',validationMiddleware.patchValidationMiddleware,userController.partialDetailUpdateController);
-router.post('/userImage/:id',validationMiddleware.imageValidationMiddleware,userController.updateUserDetailController);
+const upload = validationMiddleware.configureMulterMiddleware();
+router.post('/userImage/:id',validationMiddleware.imageValidationMiddleware, upload.single('image'), userController.postUploadUserImage);
 
 module.exports = router;

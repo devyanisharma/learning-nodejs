@@ -2,6 +2,7 @@ const express = require('express');
 console.log("HI");
 const app = express();
 const http = require('http');
+const fs = require('fs');
 
 const port = 5000
 const server = http.createServer(app)
@@ -20,22 +21,97 @@ const storage = multer.diskStorage({
     }
 })
 
-//const upload = multer({ storage: storage })
-const upload = multer()
+const upload = multer({ storage: storage })
+
+let userData = [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com", userImage: "icecream.jpeg" },
+{ userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com", userImage: "icecream.jpeg" }];
+let gallery = [{ userId: 99, userGallery: [] }]
+
+app.use(express.static("uploads"));
+
+app.get('/images', (req, res) => {
+    const userId = req.query.id;
+    const userIndex = gallery.findIndex((value, index, obj) => {
+        return value.userId == userId;
+    });
+    
+    
+    const imagePaths=[];
+    const galleryArr = gallery[userIndex].userGallery
+    galleryArr.forEach(element=>{
+        const fileName = './uploads/' + element;
+        imagePaths.push(fileName)
+    })
+    console.log(imagePaths)
+    res.setHeader('Content-Type', 'image/jpeg');
+  
+    const streamPipeline = multipipe(...imagePaths.map((imagePath) => fs.createReadStream(imagePath)));
+
+    res.set('Content-Type', 'multipart/x-mixed-replace; boundary=--myboundary');
+  
+    streamPipeline.on('data', (chunk) => {
+      res.write(`\n--myboundary\nContent-Type: image/jpeg\nContent-Length: ${chunk.length}\n\n`);
+      res.write(chunk);
+    });
+  
+    streamPipeline.on('end', () => {
+      res.end('\n--myboundary--');
+    });
+  
+  });
+
+app.get('/getImg', (req, res, next) => {
+    const userId = req.query.id;
+    const userIndex = userData.findIndex((value, index, obj) => {
+        return value.userId == userId;
+    });
+    const fileName = userData[userIndex].userImage;
+
+    res.setHeader('Content-Type', 'image/jpeg');
+   // const readStream = fs.createReadStream('./uploads/' + fileName)
+    //readStream.pipe(res);
 
 
-let userData = [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com" },
-{ userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com" }];
+    res.sendFile(__dirname + "/uploads/" + fileName, (err) => {
+        if (err) {
+            throw err;
+        }
+        console.log("Success")
+    });
 
-// app.post('/profileImg', upload.single('image'), function (req, res, next) {
-//     console.log(req.file);
-//     res.send('upload successfully')
-// })
+    res.download(__dirname + "/uploads/" + fileName, (err) => {
+        if (err) {
+            throw err;
+        }
+        console.log(err);
+    })
 
-// app.post('/multipleImg', upload.array('photos', 3), function (req, res, next) {
-//     console.log(req.files)
+})
+
+
+app.post('/profileImg/:id',upload.single('image'), function (req, res, next) {
+    const userId = req.params.id;
+    
+    console.log(userIndex)
+    userData[userIndex].userImage = req.file.filename;
+    console.log(req.file);
+    res.send('upload successfully')
+})
+
+// app.post('/multipleImg/:id', upload.array('photos', 3), function (req, res, next) {
+//     const userId = req.params.id;
+//     const userIndex = gallery.findIndex((value,index,obj)=>{
+//         return value.userId == userId;
+//         });
+//     const fileObj = req.files;
+//     fileObj.forEach(element => {
+//         gallery[userIndex].userGallery.push(element.filename);
+//       });
+//      console.log(gallery)
 //     res.send('multiple upload successfully')
 // })
+
+
 
 // const images = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'photos', maxCount: 8 }])
 // app.post('/images', images, function (req, res, next) {
@@ -43,10 +119,10 @@ let userData = [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@e
 //     res.send('All images upload successfully')
 // })
 
-app.post('/profile', upload.none(), function (req, res, next) {
-    console.log(req.file);
-    res.send('upload successfully')
-  })
+// app.post('/profile', upload.none(), function (req, res, next) {
+//     console.log(req.file);
+//     res.send('upload successfully')
+//   })
 
 
 app.get('/api/users', (req, res, next) => {

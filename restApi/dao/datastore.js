@@ -2,7 +2,7 @@ let dataStore = {
     //userData:[],
     userData: [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com" },
     { userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com" }],
-    useDetail:[{userId:99, userImage: 'image.jpeg'}],
+    userDetail: [],
 
 
     getAllUserData: function () {
@@ -95,23 +95,43 @@ let dataStore = {
         return data;
     },
 
-    uploadUserImageService: function(userId){
-        if(true){
+    uploadUserImage: function (userId, fileName) {
+        const userIndex = this.userDetail.findIndex((value, index, obj) => {
+            return value.userId == userId;
+        });
+        console.log("userIndex"+ userIndex)
+        try {
+            if (userIndex >= 0) {
+                this.userDetail[userIndex].userImage = fileName;
+            }
+            else {
+                const user = {
+                    userId: userId, userImage: fileName
+
+                }
+                this.userDetail.push(user)
+            }
             const data = {
-            "message": "success",
-            "user": user
+                "message": "success",
+                "user": this.userDetail
+            }
+            console.log(data)
+            return data;
+            
+        } catch (error) {
+            const data = {
+                "id": userId,
+                "message": "error"
+            }
+            console.log(data)
+            return data;
+
         }
-        return data;
-    }else{
-        const data = {
-            "message": "error"
-        }
-        return data;
-    }
-        
 
 
+
     }
+
 
 
 }

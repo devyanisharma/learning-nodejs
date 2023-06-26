@@ -1,4 +1,4 @@
-const { userData } = require('../dao/datastore.js');
+const { userData, userDetail } = require('../dao/datastore.js');
 const userService = require('../services/service.js')
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
             });
         } else if (data.message == "error") {
             res.status(204).json({
-                "message": "No user found",              
+                "message": "No user found",
             });
             console.log('user not found')
         }
@@ -63,30 +63,30 @@ module.exports = {
 
     },
 
-    partialDetailUpdateController: function(req,res,next){
+    partialDetailUpdateController: function (req, res, next) {
         const originalUser = req.originalUser;
         console.log("partial update contrller");
         console.log(originalUser);
         const reqBody = req.body;
-        const data= userService.partialDetailUpdateService(originalUser,reqBody);
-        if(data.message =="success"){
+        const data = userService.partialDetailUpdateService(originalUser, reqBody);
+        if (data.message == "success") {
             res.status(202).json({
-                "message":"partial data updated successfully",
-                "user":data.user
+                "message": "partial data updated successfully",
+                "user": data.user
             })
-        }else if(data.message=="error"){
+        } else if (data.message == "error") {
             res.status(400).json({
-                "message":"Bad request",
-                "user":data.user
+                "message": "Bad request",
+                "user": data.user
             })
         }
     },
 
     deleteUserController: function (req, res, next) {
         const id = req.params.id;
-        
+
         const data = userService.deleteUserService(id);
-        
+
         if (data.message == "success") {
             res.status(200).json({
                 "message": "user deleted successfully",
@@ -96,33 +96,35 @@ module.exports = {
         } else if (data.message == "error") {
             res.status(401).json({
                 "message": "User not found",
-                "id":data.id
+                "id": data.id
 
             });
         }
     },
 
-    postUploadUserImage: function(req,res,next){
-        const userId = req.params.id;
-        const data = userService.uploadUserImageService(userId);
-        
+    postUploadUserImage: function (req, res, next) {
+        console.log('post method controller')
+            const userId = req.params.id;
+            const fileName = req.file.filename;
+            const data = userService.uploadUserImageService(userId,fileName);  
+
         if (data.message == "success") {
             res.status(200).json({
-                "message": "user deleted successfully",
+                "message": "user image uploaded successfully",
                 "user": data.user
             });
 
         } else if (data.message == "error") {
             res.status(401).json({
-                "message": "User not found",
-                "id":data.id
+                "message": "some error occured",
+                "user": data.id
 
             });
         }
 
     }
-   
 
-   
+
+
 
 }
