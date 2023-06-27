@@ -36,8 +36,10 @@ module.exports = {
         });
 
         const upload = multer({ storage: storage })
+        let images = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'images', maxCount: 8 },{name: 'resume',maxCount:1}])
+
         console.log("multer instance middleware")
-        return upload;
+        return images;
     },
 
     imageValidationMiddleware: function(request,response,next){
@@ -52,12 +54,14 @@ module.exports = {
 
             });
         }
-         if(!request.body.key == 'image'){
+         if(!request.body.key == 'image'|| !request.body.key == 'images'||!request.body.key == 'resume'){
+            console.log("validation middleware - inside key")
             return response.status(401).json({
                 "message": "incorrect key",
                 
 
             }); 
+            
          }
          console.log("validation middleware")
          next();

@@ -1,5 +1,21 @@
 const { userData, userDetail } = require('../dao/datastore.js');
 const userService = require('../services/service.js')
+const path = require('path');
+const os=require('os');  
+console.log("os.freemem(): \n",os.freemem());  
+console.log("os.homedir(): \n",os.homedir());  
+console.log("os.hostname(): \n",os.hostname());  
+console.log("os.endianness(): \n",os.endianness());  
+console.log("os.loadavg(): \n",os.loadavg());  
+console.log("os.platform(): \n",os.platform());  
+console.log("os.release(): \n",os.release());  
+console.log("os.tmpdir(): \n",os.tmpdir());  
+console.log("os.totalmem(): \n",os.totalmem());  
+console.log("os.type(): \n",os.type());  
+console.log("os.uptime(): \n",os.uptime());  
+console.log("os")
+console.log(os.arch)
+
 
 module.exports = {
     getAllUsersController: function (req, res, next) {
@@ -84,7 +100,6 @@ module.exports = {
 
     deleteUserController: function (req, res, next) {
         const id = req.params.id;
-
         const data = userService.deleteUserService(id);
 
         if (data.message == "success") {
@@ -102,12 +117,23 @@ module.exports = {
         }
     },
 
-    postUploadUserImage: function (req, res, next) {
+    postProfileDetailsController: function (req, res, next) {
         console.log('post method controller')
-            const userId = req.params.id;
-            const fileName = req.file.filename;
-            const data = userService.uploadUserImageService(userId,fileName);  
+        const userId = req.params.id;
+        const files = req.files;
+        let data ;
+        let filesObject=new Object();
+        Object.assign(filesObject, files);
+        console.log(filesObject);
+        
+        if ((filesObject.hasOwnProperty('image')) && (filesObject.hasOwnProperty('images')) && (filesObject.hasOwnProperty('resume'))) {
+           data = userService.uploadUserImageService(userId, filesObject);
+        } else {
+            res.status(401).json({
+                "message": "All fields are mandatory",
 
+            });
+        }
         if (data.message == "success") {
             res.status(200).json({
                 "message": "user image uploaded successfully",
@@ -122,7 +148,61 @@ module.exports = {
             });
         }
 
+    },
+
+    getImgController:function(req,res,next){
+        const userId= req.query.id;
+        const data = userService.getImgService(userId)
+        res.setHeader('Content-Type', 'image/jpeg');
+       
+
+        if (data.message == "success") {
+            res.sendFile(path.dirname(__dirname) + "/uploads/" + data.fileName,(err) => {
+                if (err) {
+                    throw err;
+                }
+                console.log("Success")
+            });
+    
+        } else if (data.message == "error") {
+            res.status(401).json({
+                "message": "some error occured",
+                
+    
+            });
+        }
+
+
+    },
+
+    getResumeController: function(req,res,next){
+        const userId= req.query.id;
+        const data = userService.dowloadResumeService(userId)
+        res.set('Content-Type', 'application/pdf');
+        if (data.message == "success") {
+            res.download(path.dirname(__dirname) + "/uploads/" + data.fileName, (err) => {
+                if (err) {
+                    throw err;
+                }
+                console.log(err);
+                res.status(200).json({
+                    "message": "pdf downloaded",
+                    
+        
+                }); 
+            })
+    
+        } else if (data.message == "error") {
+            res.status(401).json({
+                "message": "some error occured",
+                
+    
+            });
+        }
+
+
     }
+    
 
 
 

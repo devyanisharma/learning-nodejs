@@ -2,7 +2,12 @@ let dataStore = {
     //userData:[],
     userData: [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com" },
     { userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com" }],
-    userDetail: [],
+    userDetail: [{
+        userId: "99",
+        userProfile: "1687859977490-images (1).jpeg",
+        userImages: ["1687859977492-icecream.jpeg", "1687859977495-images (1).jpeg"],
+        userResume: "1687859977496-Devyani_Resume_Latest.pdf"
+    }],
 
 
     getAllUserData: function () {
@@ -95,42 +100,87 @@ let dataStore = {
         return data;
     },
 
-    uploadUserImage: function (userId, fileName) {
+    uploadUserImage: function (userId, files) {
         const userIndex = this.userDetail.findIndex((value, index, obj) => {
             return value.userId == userId;
         });
-        console.log("userIndex"+ userIndex)
+        console.log("userIndex " + userIndex)
+        let imagesArray = [];
+        imagesArray = files.images;
+        let images = [];
+        imagesArray.forEach(element =>
+            images.push(element.filename));
+
+
         try {
             if (userIndex >= 0) {
-                this.userDetail[userIndex].userImage = fileName;
+                this.userDetail[userIndex].userProfile = files.image[0].filename;
+                this.userDetail[userIndex].userImages = images;
+                this.userDetail[userIndex].userResume = files.resume[0].filename;
+
             }
             else {
                 const user = {
-                    userId: userId, userImage: fileName
+                    userId: userId, userProfile: files.image[0].filename, userImages: images, userResume: files.resume[0].filename
 
                 }
+
                 this.userDetail.push(user)
+
             }
             const data = {
                 "message": "success",
                 "user": this.userDetail
             }
-            console.log(data)
             return data;
-            
+
         } catch (error) {
             const data = {
                 "id": userId,
                 "message": "error"
             }
-            console.log(data)
+            console.log("error" + error)
             return data;
 
         }
 
 
 
+    },
+    getImg:function(userId){
+        const userIndex = this.userDetail.findIndex((value, index, obj) => {
+            return value.userId == userId;
+        });
+        const fileName = this.userDetail[userIndex].userProfile;
+
+        const data = {
+            "message": "success",
+            "fileName": fileName
+        }
+        return data;
+
+    // }
+    //     const data = {
+    //         "id": userId,
+    //         "message": "error"
+    //     }
+    //     console.log("error" + error)
+    //     return data;
+
+    },
+
+    downloadResume:function(userId){
+        const userIndex = this.userDetail.findIndex((value, index, obj) => {
+            return value.userId == userId;
+        });
+        const fileName = this.userDetail[userIndex].userResume;
+        const data = {
+            "message": "success",
+            "fileName": fileName
+        }
+        return data;
     }
+    
 
 
 

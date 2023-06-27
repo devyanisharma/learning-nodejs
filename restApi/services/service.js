@@ -23,8 +23,16 @@ module.exports =
         return dataStore.deleteUser(id);
     },
 
-    uploadUserImageService: function(userId,fileName){
-        return dataStore.uploadUserImage(userId,fileName);
+    uploadUserImageService: function(userId,files){
+        return dataStore.uploadUserImage(userId,files);
+    },
+
+    getImgService: function(userId){
+        return dataStore.getImg(userId)
+    },
+
+    dowloadResumeService: function(userId){
+        return dataStore.downloadResume(userId)
     }
 
 

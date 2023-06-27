@@ -113,8 +113,8 @@ app.post('/profileImg/:id',upload.single('image'), function (req, res, next) {
 
 
 
-// const images = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'photos', maxCount: 8 }])
-// app.post('/images', images, function (req, res, next) {
+// onst images = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'photos', maxCount: 8 }])
+// app.post('/images', images, function (req, res, next) {c
 //     console.log(req.files)
 //     res.send('All images upload successfully')
 // })
