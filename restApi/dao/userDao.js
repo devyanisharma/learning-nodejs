@@ -1,38 +1,57 @@
-
-let dataStore = {
+const { connection } = require('../utility/connection')
+let userDao = {
     //userData:[],
     userData: [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com" },
     { userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com" }],
-    userDetail: [{
-        userId: "99",
-        userProfile: "1687859977490-images (1).jpeg",
-        userImages: ["1687859977492-icecream.jpeg", "1687859977495-images (1).jpeg"],
-        userResume: "1687859977496-Devyani_Resume_Latest.pdf"
-    }],
+    // userDetail: [{
+    //     userId: "99",
+    //     userProfile: "1687859977490-images (1).jpeg",
+    //     userImages: ["1687859977492-icecream.jpeg", "1687859977495-images (1).jpeg"],
+    //     userResume: "1687859977496-Devyani_Resume_Latest.pdf"
+    // }],
 
 
 
     getAllUserData: function () {
-        if (this.userData.length >= 1) {
-            const data = {
-                "message": "success",
-                "user": this.userData
-            }
-            return data;
-        } else {
-            const data = {
-                "message": "error"
-            }
-            return data;
-        }
+        return new Promise((resolve, reject) => {
+            connection.query('SELECT COUNT(userId) AS rowCount FROM `user`', function (err, result, fields) {
+                if (err) {
+                    console.error('error connecting: ' + err.stack);
+                    const data = {
+                        "message": "error"
+                    }
+                    return reject(data)
 
+                } else {
+                    console.log(result);
+                    let count = result[0].rowCount;
+                    if (count >= 1) {
+                        const data = {
+                            "message": "success",
+                            "user": this.userData
+                        }
+                        return resolve(data)
+                    }
+                };
+            })
+        })
     },
 
     postUserData: function (name, age, email) {
         if (name.length > 3 && age > 0 && email.includes('.') && email.includes('@')) {
             const userId = Math.floor(Math.random() * 101);
+            const query = 'INSERT INTO `user` (userId , userName , userAge , useEmail, createdDate, modifiedDate) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)';
+            connection.query(query, [userId, name, age, email, Date.now(), Date.now()], function (err, result, fields) {
+                if (err) {
+                    console.error('error connecting: ' + err.stack);
+                    return;
+                }
+
+                console.log("success");
+
+            });
             const user = { userId: userId, userName: name, userAge: age, userEmail: email }
-            this.userData.push(user);
+            //this.userData.push(user);
             const data = {
                 "message": "success",
                 "user": user
@@ -149,7 +168,7 @@ let dataStore = {
 
 
     },
-    getImg:function(userId){
+    getImg: function (userId) {
         const userIndex = this.userDetail.findIndex((value, index, obj) => {
             return value.userId == userId;
         });
@@ -161,17 +180,17 @@ let dataStore = {
         }
         return data;
 
-    // }
-    //     const data = {
-    //         "id": userId,
-    //         "message": "error"
-    //     }
-    //     console.log("error" + error)
-    //     return data;
+        // }
+        //     const data = {
+        //         "id": userId,
+        //         "message": "error"
+        //     }
+        //     console.log("error" + error)
+        //     return data;
 
     },
 
-    downloadResume:function(userId){
+    downloadResume: function (userId) {
         const userIndex = this.userDetail.findIndex((value, index, obj) => {
             return value.userId == userId;
         });
@@ -182,9 +201,9 @@ let dataStore = {
         }
         return data;
     }
-    
+
 
 
 
 }
-module.exports = dataStore;
+module.exports = userDao;

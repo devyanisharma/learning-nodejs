@@ -68,8 +68,8 @@ app.get('/getImg', (req, res, next) => {
     const fileName = userData[userIndex].userImage;
 
     res.setHeader('Content-Type', 'image/jpeg');
-   // const readStream = fs.createReadStream('./uploads/' + fileName)
-    //readStream.pipe(res);
+    const readStream = fs.createReadStream('./uploads/' + fileName)
+    readStream.pipe(res);
 
 
     res.sendFile(__dirname + "/uploads/" + fileName, (err) => {

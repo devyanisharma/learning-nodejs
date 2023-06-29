@@ -7,7 +7,7 @@ describe("testing get request", () => {
     return request(app)
       .get('/api/user/')
       .then(response => {
-        console.log(response.statusCode);
+        console.log(response.body);
         if(response.body.data.length >=1){
         expect(response.statusCode).toBe(200);
       }else{

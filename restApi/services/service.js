@@ -1,13 +1,14 @@
 const dataStore = require('../dao/datastore.js');
+const userDao = require('../dao/userDao.js');
 
 module.exports =
 {
-    getAllUserService: function () {
-        return dataStore.getAllUserData();
+    getAllUserService: async function () {
+        return await userDao.getAllUserData();
     },
 
     postUserService: function (name, age, email) {
-        return dataStore.postUserData(name, age, email);
+        return userDao.postUserData(name, age, email);
     },
 
     updateUserDetailService: function (id, name, age, email) {
