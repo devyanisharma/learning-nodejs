@@ -15,19 +15,24 @@ module.exports = {
                         "message": "user fetched successfully",
                         "user": data.user
                     });
+                } else if (data.message == "error2") {
+                    console.log(data);
+                    res.status(204).json({
+                        "message": "no user found",
+                        "user": data.user
+                    });
                 }
-    
             } catch (error) {
                 if (error.message == "error") {
-                    res.status(204).json({
-                        "message": "No user found",
+                    res.status(401).json({
+                        "message": "something went wrong. reject"
                     });
-                console.log(error)
-    
-            }}
-        })().catch((err)=> {
-            res.status(204).json({
-                "message": "User not found. something went wrong",
+                    console.log(error)
+                }
+            }
+        })().catch((err) => {
+            res.status(401).json({
+                "message": "something error occured"
             });
         });
 
@@ -56,24 +61,36 @@ module.exports = {
     },
 
     postUserController: function (req, res, next) {
-
         const name = req.body.name;
         const age = req.body.age;
         const email = req.body.email;
+        if (name.length > 3 && age > 0 && email.includes('.') && email.includes('@')) {
+            (async () => {
+                const userId = Math.floor(Math.random() * 101);
+                try {
+                    const data = await userService.postUserService(userId, name, age, email);
+                    if (data.message == "success") {
+                        res.status(201).json({
+                            "message": "user added successfully",
+                            "user": data.user
+                        });
+                    }
+                } catch (error) {
+                    console.log(" reject - db error " + error);
+                    return res.status(401).json(error);
+                }
+            })().catch((error) => {
+                console.log("in async catch - " + error);
+                return res.status(401).json({
+                    "message": "something went wrong"
+                });
 
-        const data = userService.postUserService(name, age, email);
-        if (data.message == "success") {
-            res.status(201).json({
-                "message": "user added successfully",
-                "user": data.user
-            });
-        } else if (data.message == "error") {
+            })
+        } else {
             res.status(401).json({
-                "message": "forbidden request",
+                "message": "fields validation doesn't matched"
             });
         }
-
-
     },
 
     updateUserDetailController: function (req, res, next) {
@@ -82,19 +99,32 @@ module.exports = {
             const name = req.body.name;
             const age = req.body.age;
             const email = req.body.email;
-            const data = userService.updateUserDetailService(id, name, age, email);
-            if (data.message == "success") {
-                res.status(202).json({
-                    "message": "user updated successfully",
-                    "user": data.user
-                });
-            } else if (data.message == "error") {
-                res.status(401).json({
+            (async () => {
+                try {
+                    const data = await userService.updateUserDetailService(id, name, age, email);
+                    if (data.message == "success") {
+                        return res.status(202).json({
+                            "message": "user updated successfully",
+
+                        });
+                    }
+                } catch (error) {
+                    if (error.message == "error") {
+                        return res.status(401).json({
+                            "message": "forbidden request. db error",
+                        });
+                    }
+                }
+
+            })().catch((error) => {
+                console.log("in async catch" + error)
+                return res.status(401).json({
                     "message": "forbidden request",
                 });
-            }
+            })
+
         } else {
-            res.status(400).json({
+            return res.status(400).json({
                 "message": "Incomplete request. All fields are mandatory for update",
             });
         }
@@ -103,41 +133,66 @@ module.exports = {
     },
 
     partialDetailUpdateController: function (req, res, next) {
-        const originalUser = req.originalUser;
-        console.log("partial update contrller");
-        console.log(originalUser);
+        const userId = req.params.id;
         const reqBody = req.body;
-        const data = userService.partialDetailUpdateService(originalUser, reqBody);
-        if (data.message == "success") {
-            res.status(202).json({
-                "message": "partial data updated successfully",
-                "user": data.user
-            })
-        } else if (data.message == "error") {
+        (async () => {
+            const data = await userService.partialDetailUpdateService(userId, reqBody);
+            try {
+                if (data.message == "success") {
+                    res.status(202).json({
+                        "message": "partial data updated successfully",
+                        "user": data.user
+                    })
+                }
+            } catch (error) {
+                if (data.message == "error") {
+                    console.log("error in db")
+                    res.status(400).json({
+                        "message": "Bad request",
+
+                    })
+                }
+            }
+        })().catch((error) => {
+            console.log(error + "error in async ")
             res.status(400).json({
                 "message": "Bad request",
                 "user": data.user
             })
-        }
+        })
+
     },
 
     deleteUserController: function (req, res, next) {
         const id = req.params.id;
-        const data = userService.deleteUserService(id);
-
-        if (data.message == "success") {
-            res.status(200).json({
-                "message": "user deleted successfully",
-                "user": data.user
-            });
-
-        } else if (data.message == "error") {
-            res.status(401).json({
-                "message": "User not found",
-                "id": data.id
-
-            });
-        }
+        (async () => {
+            try {
+                const data = await userService.deleteUserService(id);
+                if (data.message == "success") {
+                    res.status(200).json({
+                        "message": "user deleted successfully",
+                        "id": data.id
+                    });
+                }else if(data.message == "error"){
+                    res.status(200).json({
+                        "message": "no user found",
+                        "id": data.id
+                    });
+                }
+            } catch (error) {
+                if (error.message == "error") {
+                    res.status(401).json({
+                        "message": "soemthing went wrong. error in db",
+                      "id": data.id
+                    });
+                }
+            }
+        })().catch((error) => {
+            console.log("inside async" + error)
+            res.status(400).json({
+                "message": "Bad request"
+            })
+        })
     },
 
     postProfileDetailsController: function (req, res, next) {

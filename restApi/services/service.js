@@ -7,21 +7,21 @@ module.exports =
         return await userDao.getAllUserData();
     },
 
-    postUserService: function (name, age, email) {
-        return userDao.postUserData(name, age, email);
+    postUserService: async function (userId,name, age, email) {
+        return await userDao.postUserData(userId,name, age, email);
     },
 
-    updateUserDetailService: function (id, name, age, email) {
-        return dataStore.updateUserDetail(id, name, age, email);
+    updateUserDetailService: async function (id, name, age, email) {
+          return await userDao.updateUserDetail(id, name, age, email);
 
     },
 
-    partialDetailUpdateService: function(id,reqBody){
-        return dataStore.partialDetailUpdate(id,reqBody);
+    partialDetailUpdateService: async function(id,reqBody){
+        return await userDao.partialDetailUpdate(id,reqBody);
     },
 
-    deleteUserService: function (id) {
-        return dataStore.deleteUser(id);
+    deleteUserService: async function (id) {
+        return await userDao.deleteUser(id);
     },
 
     uploadUserImageService: function(userId,files){

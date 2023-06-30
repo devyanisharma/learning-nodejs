@@ -1,18 +1,11 @@
-const { userData } = require('../dao/datastore.js');
+const { userData } = require('../dao/userDao');
 const {userDetail} = require('../dao/datastore.js');
 const multer = require('multer')
 
 module.exports = {
     patchValidationMiddleware:function(req,res,next){
         const userId = req.params.id;
-        let originalUser = userData.find(function (value, index, obj) {
-           return value.userId == userId;
-        });
-        if (originalUser == undefined){
-            return res.status(400).json({
-                "message": "Id not found"
-            })
-        }
+        let originalUser = userData[0]
         const patchObject = req.body;
         for (var key in patchObject) {
             if (!originalUser.hasOwnProperty(key)) {
