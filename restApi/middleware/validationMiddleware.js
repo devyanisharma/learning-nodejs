@@ -36,17 +36,17 @@ module.exports = {
     },
 
     imageValidationMiddleware: function(request,response,next){
-        const userId = request.params.id;
-        const userIndex = userData.findIndex((value, index, obj) => {
-            return value.userId == userId;
-        });
-        if (userIndex == -1) {
-            return response.status(401).json({
-                "message": "User id not found",
+        // const userId = request.params.id;
+        // const userIndex = userData.findIndex((value, index, obj) => {
+        //     return value.userId == userId;
+        // });
+        // if (userIndex == -1) {
+        //     return response.status(401).json({
+        //         "message": "User id not found",
                 
 
-            });
-        }
+        //     });
+        // }
          if(!request.body.key == 'image'|| !request.body.key == 'images'||!request.body.key == 'resume'){
             console.log("validation middleware - inside key")
             return response.status(401).json({

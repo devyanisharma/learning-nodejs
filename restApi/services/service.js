@@ -1,5 +1,6 @@
 const dataStore = require('../dao/datastore.js');
 const userDao = require('../dao/userDao.js');
+const { use } = require('../routes/index.js');
 
 module.exports =
 {
@@ -24,16 +25,16 @@ module.exports =
         return await userDao.deleteUser(id);
     },
 
-    uploadUserImageService: function(userId,files){
-        return dataStore.uploadUserImage(userId,files);
+    uploadUserImageService: async function(userId,files){
+        return await userDao.uploadUserImage(userId,files);
     },
 
-    getImgService: function(userId){
-        return dataStore.getImg(userId)
+    getImgService: async function(userId){
+        return await userDao.getImg(userId)
     },
 
-    dowloadResumeService: function(userId){
-        return dataStore.downloadResume(userId)
+    dowloadResumeService: async function(userId){
+        return await userDao.downloadResume(userId)
     }
 
 

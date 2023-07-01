@@ -1,5 +1,4 @@
 const { connection } = require('../utility/connection');
-const { query } = require('express');
 
 let userDao = {
     userData: [{ userId: 99, userName: "Shivang", userAge: 22, useEmail: "as@email.com" },
@@ -127,101 +126,157 @@ let userDao = {
                 if (err) {
                     const data = {
                         "message": "error",
-                        "id":id
+                        "id": id
                     }
                     return reject(data);
-                }else{
-                    if(result.affectedRows>0){
+                } else {
+                    if (result.affectedRows > 0) {
                         const data = {
                             "message": "success",
-                            "id":id
+                            "id": id
                         }
                         return resolve(data)
-                    }else{
+                    } else {
                         const data = {
                             "message": "error",
-                            "id":id
+                            "id": id
                         }
                         return resolve(data)
                     }
-                } 
+                }
             })
         })
     },
 
     uploadUserImage: function (userId, files) {
-        const userIndex = this.userDetail.findIndex((value, index, obj) => {
-            return value.userId == userId;
-        });
-        console.log("userIndex " + userIndex)
-        let imagesArray = [];
-        imagesArray = files.images;
-        let images = [];
-        imagesArray.forEach(element =>
-            images.push(element.filename));
-        try {
-            if (userIndex >= 0) {
-                this.userDetail[userIndex].userProfile = files.image[0].filename;
-                this.userDetail[userIndex].userImages = images;
-                this.userDetail[userIndex].userResume = files.resume[0].filename;
-            }
-            else {
-                const user = {
-                    userId: userId, userProfile: files.image[0].filename, userImages: images, userResume: files.resume[0].filename
-
+        return new Promise((resolve, reject) => {
+            let imagesArray = [];
+            imagesArray = files.images;
+            let images = [];
+            imagesArray.forEach(element =>
+                images.push(element.filename));
+            const values = [userId,files.image[0].filename, JSON.stringify(images), files.resume[0].filename];
+            console.log(values);
+            
+            (async()=>{
+                try {
+                    const rowCount = await userCheckFunction(userId);
+                    if (rowCount == 0) {
+                        
+                        const query2 = 'INSERT INTO `userDetail` (userId , userProfile , userImages , userResume) VALUES (?, ?, ?, ?)'
+                        connection.query(query2, values, function (error, results, fields) {
+                            if (error) {
+                                console.log("error in insert query")
+                                console.log(error);
+                                data = {
+                                    "message": "error"
+                                }
+                                return reject(data)
+                            }
+                            data = { "message": "success" }
+                            return resolve(data)
+                        })
+                    } else {
+                        const query2 = 'UPDATE `userDetail` SET userProfile=?, userImages=?, userResume=? where userId = ?'
+                        const values = [files.image[0].filename, JSON.stringify(images), files.resume[0].filename,userId];
+                        connection.query(query2, values, function (error, results, fields) {
+                            if (error) {
+                                console.log(error);
+                                data = {
+                                    "messgae": "error in db while updating"
+                                }
+                                return reject(data)
+                            }
+                            data = { "message": "success" }
+                            return resolve(data)
+                        })
+                    }
+    
+                } catch (error) {
+                    
+                    console.log("return error from select function in async ")
+                    console.log(error);
+                    return reject(error);
+    
                 }
-                this.userDetail.push(user)
+            })().catch((error)=>{
+                console.log(error)
+            })
+           
+
+        })
+    },
+
+    getImg: function (userId) {
+    return new Promise ((resolve,reject)=>{
+        const query = 'select `userProfile` from `userDetail` where userId = ?'
+        connection.query(query,userId,function(err,result,fields){
+            if(err){
+                console.log(err)
+                const data = {
+                    "message":"error"
+                }
+                return reject(data)
             }
+            console.log("result")
+            console.log(result[0].userProfile)
             const data = {
                 "message": "success",
-                "user": this.userDetail
+                "fileName": result[0].userProfile
             }
-            return data;
-        } catch (error) {
-            const data = {
-                "id": userId,
-                "message": "error"
-            }
-            console.log("error" + error)
-            return data;
-        }
-    },
-    getImg: function (userId) {
-        const userIndex = this.userDetail.findIndex((value, index, obj) => {
-            return value.userId == userId;
-        });
-        const fileName = this.userDetail[userIndex].userProfile;
+            return resolve(data);
 
-        const data = {
-            "message": "success",
-            "fileName": fileName
-        }
-        return data;
+        }) 
 
-        // }
-        //     const data = {
-        //         "id": userId,
-        //         "message": "error"
-        //     }
-        //     console.log("error" + error)
-        //     return data;
-
-    },
+   })
+  },
 
     downloadResume: function (userId) {
-        const userIndex = this.userDetail.findIndex((value, index, obj) => {
-            return value.userId == userId;
-        });
-        const fileName = this.userDetail[userIndex].userResume;
-        const data = {
-            "message": "success",
-            "fileName": fileName
-        }
-        return data;
+        
+        return new Promise ((resolve,reject)=>{
+            const query = 'select `userResume` from `userDetail` where userId = ?'
+            connection.query(query,userId,function(err,result,fields){
+                if(err){
+                    console.log(err)
+                    const data = {
+                        "message":"error"
+                    }
+                    return reject(data)
+                }
+                console.log("result")
+                console.log(result[0].userResume)
+                const data = {
+                    "message": "success",
+                    "fileName": result[0].userResume
+                }
+                return resolve(data);
+    
+            }) 
+    
+       })
     }
 
 
 
 
+}
+
+function userCheckFunction(userId) {
+    return new Promise((resolve, reject) => {
+       const query = 'SELECT count(userId) As rowCount FROM `userDetail` where userId=?'
+        connection.query(query, userId, function (err, results, fields) {
+            if (err) {
+                console.log("error in select function in query")
+                console.log(err)
+                const data = { "message": "error" }
+                return reject(data)
+            }
+            else {
+                const count = results[0].rowCount;
+                console.log("success in user check - "+ count);
+                return resolve(count)
+            }
+        })
+    })
 }
 module.exports = userDao;

@@ -1,4 +1,4 @@
-const { userData, userDetail } = require('../dao/userDao.js');
+//const { userData, userDetail } = require('../dao/userDao.js');
 //const { userData, userDetail } = require('../dao/datastore.js');
 const userService = require('../services/service.js');
 const path = require('path');
@@ -173,7 +173,7 @@ module.exports = {
                         "message": "user deleted successfully",
                         "id": data.id
                     });
-                }else if(data.message == "error"){
+                } else if (data.message == "error") {
                     res.status(200).json({
                         "message": "no user found",
                         "id": data.id
@@ -183,7 +183,7 @@ module.exports = {
                 if (error.message == "error") {
                     res.status(401).json({
                         "message": "soemthing went wrong. error in db",
-                      "id": data.id
+                        "id": data.id
                     });
                 }
             }
@@ -196,93 +196,96 @@ module.exports = {
     },
 
     postProfileDetailsController: function (req, res, next) {
-        console.log('post method controller')
         const userId = req.params.id;
         const files = req.files;
-        let data;
         let filesObject = new Object();
         Object.assign(filesObject, files);
-        console.log(filesObject);
-
         if ((filesObject.hasOwnProperty('image')) && (filesObject.hasOwnProperty('images')) && (filesObject.hasOwnProperty('resume'))) {
-            data = userService.uploadUserImageService(userId, filesObject);
+            (async () => {
+                try {
+                    const data = await userService.uploadUserImageService(userId, filesObject);
+                    if (data.message == "success") {
+                        res.status(200).json({
+                            "message": "user Detail uploaded successfully"
+
+                        });
+                    }
+                } catch (err) {
+                    if (err.message == "error") {
+                        res.status(401).json({
+                            "message": "some error occured.user id not correct"
+
+                        });
+                    }
+                }
+            })().catch((error) => {
+                console.log("inside async error" + error)
+            })
         } else {
             res.status(401).json({
-                "message": "All fields are mandatory",
-
+                "message": "All fields are mandatory"
             });
         }
-        if (data.message == "success") {
-            res.status(200).json({
-                "message": "user image uploaded successfully",
-                "user": data.user
-            });
 
-        } else if (data.message == "error") {
-            res.status(401).json({
-                "message": "some error occured",
-                "user": data.id
-
-            });
-        }
 
     },
 
     getImgController: function (req, res, next) {
         const userId = req.query.id;
-        const data = userService.getImgService(userId)
-        res.setHeader('Content-Type', 'image/jpeg');
-
-
-        if (data.message == "success") {
-            res.sendFile(path.dirname(__dirname) + "/uploads/" + data.fileName, (err) => {
-                if (err) {
-                    throw err;
+        (async () => {
+            try {
+                const data = await userService.getImgService(userId)
+                res.setHeader('Content-Type', 'image/jpeg');
+                if (data.message == "success") {
+                    res.sendFile(path.dirname(__dirname) + "/uploads/" + data.fileName, (err) => {
+                        if (err) {
+                            throw err;
+                        }
+                        console.log("Success")
+                    });
                 }
-                console.log("Success")
-            });
-
-        } else if (data.message == "error") {
-            res.status(401).json({
-                "message": "some error occured",
-
-
-            });
-        }
-
+            }
+            catch (error) {
+                if (data.message == "error") {
+                    res.status(401).json({
+                        "message": "some error occured",
+                    });
+                }
+            }
+        })().catch((error) => {
+            console.log("inside async");
+            console.log(error);
+        })
 
     },
 
     getResumeController: function (req, res, next) {
         const userId = req.query.id;
-        const data = userService.dowloadResumeService(userId)
-        res.set('Content-Type', 'application/pdf');
-        if (data.message == "success") {
-            res.download(path.dirname(__dirname) + "/uploads/" + data.fileName, (err) => {
-                if (err) {
-                    throw err;
+        (async()=>{
+            try {
+                const data = await userService.dowloadResumeService(userId)
+                if (data.message == "success") {
+                    res.set('Content-Type', 'application/pdf');
+                    res.download(path.dirname(__dirname) + "/uploads/" + data.fileName, (err) => {
+                        if (err) {
+                            throw err;
+                        }
+                        console.log(err);
+                        res.status(200).json({
+                            "message": "pdf downloaded",
+                        });
+                    })
                 }
-                console.log(err);
-                res.status(200).json({
-                    "message": "pdf downloaded",
-
-
-                });
-            })
-
-        } else if (data.message == "error") {
-            res.status(401).json({
-                "message": "some error occured",
-
-
-            });
-        }
-
-
+            } catch (data) {
+                if (data.message == "error") {
+                    res.status(401).json({
+                        "message": "some error occured"
+                    });
+                }
+            }
+        })().catch((err)=>{
+            console.log("inside async");
+            console.log(err)
+        })
     }
-
-
-
-
-
 }
