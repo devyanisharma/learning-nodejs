@@ -1,6 +1,5 @@
-const dataStore = require('../dao/datastore.js');
+//const dataStore = require('../dao/datastore.js');
 const userDao = require('../dao/userDao.js');
-const { use } = require('../routes/index.js');
 
 module.exports =
 {

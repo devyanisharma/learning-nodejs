@@ -268,13 +268,11 @@ module.exports = {
                     res.set('Content-Type', 'application/pdf');
                     res.download(path.dirname(__dirname) + "/uploads/" + data.fileName, (err) => {
                         if (err) {
+                            console.log(err);
                             throw err;
-                        }
-                        console.log(err);
-                        res.status(200).json({
-                            "message": "pdf downloaded",
-                        });
+                        }  
                     })
+                   console.log("pdf download") 
                 }
             } catch (data) {
                 if (data.message == "error") {
@@ -284,8 +282,9 @@ module.exports = {
                 }
             }
         })().catch((err)=>{
-            console.log("inside async");
             console.log(err)
+            console.log("inside async");
+            
         })
     }
 }
