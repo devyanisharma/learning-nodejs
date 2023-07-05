@@ -1,28 +1,18 @@
-const { connection } = require('../utility/connection');
+//const { connection } = require('../utility/connection');
+const { db } = require('../utility/connection_mongodb')
 
+// setTimeout(() => {
+//     console.log(db.db)
+// }, 3000);
 
 let userDao = {
-    userData: [{ userId: 99, userName: "Shivang", userAge: 22, useEmail: "as@email.com" },
-    { userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com" }],
-    userDetail: [{
-        id: 1,
-        userId: "99",
-        userProfile: "1687859977490-images (1).jpeg",
-        userImages: ["1687859977492-icecream.jpeg", "1687859977495-images (1).jpeg"],
-        userResume: "1687859977496-Devyani_Resume_Latest.pdf"
-    }],
+
     getAllUserData: function () {
         return new Promise((resolve, reject) => {
-            connection.query('SELECT * FROM `user`', function (err, result, fields) {
-                if (err) {
-                    console.error('error connecting: ' + err.stack);
-                    const data = {
-                        "message": "error"
-                    }
-                    return reject(data)
-
-                } else {
-                    console.log(result);
+            (async () => {
+                try {
+                    const collection = await db.db.collection('user');
+                    const result = await collection.find({}).toArray();
                     if (result.length >= 1) {
                         const data = {
                             "message": "success",
@@ -33,36 +23,64 @@ let userDao = {
                         const data = {
                             "message": "error2",
                             "user": result
-
                         }
                         return resolve(data)
-
                     }
-                };
+                } catch {
+                    const data = {
+                        "message": "error"
+                    }
+                    console.log("inside catch");
+                    return reject(data)
+                }
+            })().catch((error) => {
+                console.log("inside error of asyn catch")
             })
         })
     },
 
-    postUserData: function (userId, name, age, email) {
-
+    postUserData: function (name, age, email) {
         return new Promise((resolve, reject) => {
-            const query = 'INSERT INTO `user` (userId , userName , userAge , useEmail, createdDate, modifiedDate) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)';
-            connection.query(query, [userId, name, age, email, Date.now(), Date.now()], function (err, result, fields) {
-                if (err) {
-                    console.error('db error connecting: ' + err.stack);
+            let count = [];
+            (async () => {
+                try {
+                    //setting userId
+                    const counters = await db.db.collection('counters');
+                    count = await counters.find({}).toArray();
+                    let userId = count[0].id;
+
+                    //inserting user
+                    const collection = await db.db.collection('user');
+                    const insertResult = await collection.insertOne({userName: name, userAge: age, userEmail: email, createdDate: Date.now(), modifiedDate: Date.now(),userId: userId });
+                    const user = {userName:name, userAge:age, userEmail:email, createdDate:Date.now(), modifiedDate:Date.now(), userId:userId }
+                    console.log(user)
+                    userId = userId + 1
+                    const update = await counters.updateOne({ }, { $set: { id: userId } });
+
+                    if (insertResult.acknowledged) {
+                        const data = {
+                            "message": "success",
+                            "user": user
+                        }
+                        return resolve(data);
+                    }else{
+                        const data = {
+                            "message": "error. something while inserting data. "
+                        }
+                        return reject(data); 
+                    }
+
+                } catch (error){
+                    console.log(error)
                     const data = {
                         "message": "error. something went wrong db side. "
                     }
                     return reject(data);
                 }
-                const user = { userId: userId, userName: name, userAge: age, userEmail: email }
-                const data = {
-                    "message": "success",
-                    "user": user
-                }
-                return resolve(data);
 
-            });
+            })().catch((error) => {
+                console.log("inside error of asyn catch")
+            })
         })
     },
 
@@ -156,14 +174,14 @@ let userDao = {
             let images = [];
             imagesArray.forEach(element =>
                 images.push(element.filename));
-            const values = [userId,files.image[0].filename, JSON.stringify(images), files.resume[0].filename];
+            const values = [userId, files.image[0].filename, JSON.stringify(images), files.resume[0].filename];
             console.log(values);
-            
-            (async()=>{
+
+            (async () => {
                 try {
                     const rowCount = await userCheckFunction(userId);
                     if (rowCount == 0) {
-                        
+
                         const query2 = 'INSERT INTO `userDetail` (userId , userProfile , userImages , userResume) VALUES (?, ?, ?, ?)'
                         connection.query(query2, values, function (error, results, fields) {
                             if (error) {
@@ -179,7 +197,7 @@ let userDao = {
                         })
                     } else {
                         const query2 = 'UPDATE `userDetail` SET userProfile=?, userImages=?, userResume=? where userId = ?'
-                        const values = [files.image[0].filename, JSON.stringify(images), files.resume[0].filename,userId];
+                        const values = [files.image[0].filename, JSON.stringify(images), files.resume[0].filename, userId];
                         connection.query(query2, values, function (error, results, fields) {
                             if (error) {
                                 console.log(error);
@@ -192,55 +210,55 @@ let userDao = {
                             return resolve(data)
                         })
                     }
-    
+
                 } catch (error) {
-                    
+
                     console.log("return error from select function in async ")
                     console.log(error);
                     return reject(error);
-    
+
                 }
-            })().catch((error)=>{
+            })().catch((error) => {
                 console.log(error)
             })
-           
+
 
         })
     },
 
     getImg: function (userId) {
-    return new Promise ((resolve,reject)=>{
-        const query = 'select `userProfile` from `userDetail` where userId = ?'
-        connection.query(query,userId,function(err,result,fields){
-            if(err){
-                console.log(err)
-                const data = {
-                    "message":"error"
-                }
-                return reject(data)
-            }
-            console.log("result")
-            console.log(result[0].userProfile)
-            const data = {
-                "message": "success",
-                "fileName": result[0].userProfile
-            }
-            return resolve(data);
-
-        }) 
-
-   })
-  },
-
-    downloadResume: function (userId) {
-        
-        return new Promise ((resolve,reject)=>{
-            const query = 'select `userResume` from `userDetail` where userId = ?'
-            connection.query(query,userId,function(err,result,fields){
-                if(err){
+        return new Promise((resolve, reject) => {
+            const query = 'select `userProfile` from `userDetail` where userId = ?'
+            connection.query(query, userId, function (err, result, fields) {
+                if (err) {
                     console.log(err)
                     const data = {
-                        "message":"error"
+                        "message": "error"
+                    }
+                    return reject(data)
+                }
+                console.log("result")
+                console.log(result[0].userProfile)
+                const data = {
+                    "message": "success",
+                    "fileName": result[0].userProfile
+                }
+                return resolve(data);
+
+            })
+
+        })
+    },
+
+    downloadResume: function (userId) {
+
+        return new Promise((resolve, reject) => {
+            const query = 'select `userResume` from `userDetail` where userId = ?'
+            connection.query(query, userId, function (err, result, fields) {
+                if (err) {
+                    console.log(err)
+                    const data = {
+                        "message": "error"
                     }
                     return reject(data)
                 }
@@ -251,10 +269,10 @@ let userDao = {
                     "fileName": result[0].userResume
                 }
                 return resolve(data);
-    
-            }) 
-    
-       })
+
+            })
+
+        })
     }
 
 
@@ -264,7 +282,7 @@ let userDao = {
 
 function userCheckFunction(userId) {
     return new Promise((resolve, reject) => {
-       const query = 'SELECT count(userId) As rowCount FROM `userDetail` where userId=?'
+        const query = 'SELECT count(userId) As rowCount FROM `userDetail` where userId=?'
         connection.query(query, userId, function (err, results, fields) {
             if (err) {
                 console.log("error in select function in query")
@@ -274,7 +292,7 @@ function userCheckFunction(userId) {
             }
             else {
                 const count = results[0].rowCount;
-                console.log("success in user check - "+ count);
+                console.log("success in user check - " + count);
                 return resolve(count)
             }
         })

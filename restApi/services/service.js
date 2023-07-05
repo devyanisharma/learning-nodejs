@@ -1,5 +1,6 @@
-//const dataStore = require('../dao/datastore.js');
-const userDao = require('../dao/userDao.js');
+//const userDao = require('../dao/datastore.js');
+//const userDao = require('../dao/userDao.js');
+const userDao = require('../dao/userdao_mongo.js');
 
 module.exports =
 {
@@ -7,8 +8,8 @@ module.exports =
         return await userDao.getAllUserData();
     },
 
-    postUserService: async function (userId,name, age, email) {
-        return await userDao.postUserData(userId,name, age, email);
+    postUserService: async function (name, age, email) {
+        return await userDao.postUserData(name, age, email);
     },
 
     updateUserDetailService: async function (id, name, age, email) {

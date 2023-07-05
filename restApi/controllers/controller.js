@@ -1,5 +1,6 @@
 //const { userData, userDetail } = require('../dao/userDao.js');
 //const { userData, userDetail } = require('../dao/datastore.js');
+//const userDao = require('../dao/userdao_mongo.js');
 const userService = require('../services/service.js');
 const path = require('path');
 
@@ -66,9 +67,9 @@ module.exports = {
         const email = req.body.email;
         if (name.length > 3 && age > 0 && email.includes('.') && email.includes('@')) {
             (async () => {
-                const userId = Math.floor(Math.random() * 101);
+                //const userId = Math.floor(Math.random() * 101);
                 try {
-                    const data = await userService.postUserService(userId, name, age, email);
+                    const data = await userService.postUserService( name, age, email);
                     if (data.message == "success") {
                         res.status(201).json({
                             "message": "user added successfully",
