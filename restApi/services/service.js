@@ -1,6 +1,7 @@
 //const userDao = require('../dao/datastore.js');
-//const userDao = require('../dao/userDao.js');
-const userDao = require('../dao/userdao_mongo.js');
+//const userDao = require('../dao/userDao_mysql');
+//const userDao = require('../dao/userdao_mongo.js');
+const userDao  = require('../dao/userDao_mongoose');
 
 module.exports =
 {

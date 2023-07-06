@@ -3,6 +3,7 @@ const app = express();
 
 app.use(express.json());
 
+
 const userRouter = require('./routes/index.js');
 app.use('/api/user', userRouter);
 

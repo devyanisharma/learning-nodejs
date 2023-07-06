@@ -1,7 +1,5 @@
-const { connection } = require('../utility/conn_mongodb')
-// setTimeout(() => {
-//     console.log(connection.db)
-// }, 3000);
+const { connection } = require('../utility/conn_mongoose');
+const { UserModel ,Counters} = require('../utility/mongoose_models');
 
 let userDao = {
 
@@ -9,9 +7,8 @@ let userDao = {
         return new Promise((resolve, reject) => {
             (async () => {
                 try {
-                    const collection = await connection.db.collection('users');
-                    const result = await collection.find().toArray();
-                    console.log(result)
+                    const result = await UserModel.find();
+                    console.log(result);
                     if (result.length >= 1) {
                         const data = {
                             "message": "success",
@@ -20,7 +17,7 @@ let userDao = {
                         return resolve(data)
                     } else {
                         const data = {
-                            "message": "error2",
+                            "message": "success",
                             "user": result
                         }
                         return resolve(data)
@@ -44,13 +41,14 @@ let userDao = {
             (async () => {
                 try {
                     //setting userId
-                    const counters = await connection.db.collection('counters');
-                    count = await counters.find({}).toArray();
+                    const count = await Counters.find();
                     let userId = count[0].id;
+                    console.log("userId",userId)
 
                     //inserting user
-                    const collection = await connection.db.collection('users');
-                    const insertResult = await collection.insertOne({ userName: name, userAge: age, userEmail: email, createdDate: Date.now(), modifiedDate: Date.now(), userId: userId });
+                   
+                    const insertResult = new UserModel({ userName: name, userAge: age, userEmail: email, createdDate: Date.now(), modifiedDate: Date.now(), userId: userId });
+                    await insertResult.save();
                     const user = { userName: name, userAge: age, userEmail: email, createdDate: Date.now(), modifiedDate: Date.now(), userId: userId }
                     console.log(user)
                     userId = userId + 1
@@ -88,7 +86,7 @@ let userDao = {
         return new Promise((resolve, reject) => {
             (async () => {
                 try {
-                    const collection = await connection.db.collection('users');
+                    const collection = await db.db.collection('user');
                     const result = await collection.updateOne({ userId: id }, { $set: { userName: name, userAge: age, userEmail: email, modifiedDate: Date.now() } })
                     console.log({ userName: name, userAge: age, userEmail: email, modifiedDate: Date.now() }, id);
                     if (result.modifiedCount > 0) {
@@ -123,7 +121,7 @@ let userDao = {
             patchObject.modifiedDate = Date.now();
             (async () => {
                 try {
-                    const collection = await connection.db.collection('users');
+                    const collection = await db.db.collection('user');
                     const result = await collection.updateOne({ userId: userId }, { $set: patchObject });
                     console.log(result)
                     if (result.modifiedCount > 0) {
@@ -155,7 +153,7 @@ let userDao = {
         return new Promise((resolve, reject) => {
             (async () => {
                 try {
-                    const collection = await connection.db.collection('users');
+                    const collection = await db.db.collection('user');
                     const result = await collection.deleteOne({ userId: id });
                     console.log(result)
                     if (result.deletedCount > 0) {
@@ -198,7 +196,7 @@ let userDao = {
             console.log(values);
             (async () => {
                 try {
-                    const collection = await connection.db.collection('users');
+                    const collection = await db.db.collection('user');
                     const result = await collection.updateOne({ userId: userId }, { $set: { userProfile: files.image[0].filename, userImages: JSON.stringify(images), userResume: files.resume[0].filename } })
                     console.log(result);
                     if (result.modifiedCount > 0) {
@@ -227,7 +225,7 @@ let userDao = {
         return new Promise((resolve, reject) => {
             (async () => {
                 try {
-                    const collection = await connection.db.collection('users');
+                    const collection = await db.db.collection('user');
                     const result = await collection.findOne({ userId: userId });
                     console.log(result);
                     if (result != null) {
@@ -262,7 +260,7 @@ let userDao = {
         return new Promise((resolve, reject) => {
             (async () => {
                 try {
-                    const collection = await connection.db.collection('users');
+                    const collection = await db.db.collection('user');
                     const result = await collection.findOne({ userId: userId });
                     console.log(result);
                     if (result != null) {
@@ -300,3 +298,6 @@ let userDao = {
 }
 
 module.exports = userDao;
+
+
+

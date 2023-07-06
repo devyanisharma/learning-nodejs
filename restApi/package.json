@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest routes.test.js",
     "start": "nodemon server.js",
-    "mongo":"nodemon connection_mongodb.js"
+    "mongo": "nodemon utility/conn_mongoose.js"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,7 @@
     "express-fileupload": "^1.4.0",
     "jest": "^29.5.0",
     "mongodb": "^5.6.0",
+    "mongoose": "^7.3.1",
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.4.2",
     "nodemon": "^2.0.22"

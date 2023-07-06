@@ -1,5 +1,5 @@
-//const { userData, userDetail } = require('../dao/userDao.js');
 //const { userData, userDetail } = require('../dao/datastore.js');
+//const { userData, userDetail } = require('../dao/userDao.js');
 //const userDao = require('../dao/userdao_mongo.js');
 const userService = require('../services/service.js');
 const path = require('path');
@@ -18,7 +18,7 @@ module.exports = {
                     });
                 } else if (data.message == "error2") {
                     console.log(data);
-                    res.status(204).json({
+                    res.status(400).json({
                         "message": "no user found",
                         "user": data.user
                     });
@@ -36,9 +36,6 @@ module.exports = {
                 "message": "something error occured"
             });
         });
-
-
-
 
         //    try {
         //         userService.getAllUserService().then((data) => {
@@ -69,7 +66,7 @@ module.exports = {
             (async () => {
                 //const userId = Math.floor(Math.random() * 101);
                 try {
-                    const data = await userService.postUserService( name, age, email);
+                    const data = await userService.postUserService(name, age, email);
                     if (data.message == "success") {
                         res.status(201).json({
                             "message": "user added successfully",
@@ -85,7 +82,6 @@ module.exports = {
                 return res.status(401).json({
                     "message": "something went wrong"
                 });
-
             })
         } else {
             res.status(401).json({
@@ -100,9 +96,10 @@ module.exports = {
             const name = req.body.name;
             const age = req.body.age;
             const email = req.body.email;
+            console.log(id.constructor.name);
             (async () => {
                 try {
-                    const data = await userService.updateUserDetailService(id, name, age, email);
+                    const data = await userService.updateUserDetailService(Number.parseInt(id), name, age, email);
                     if (data.message == "success") {
                         return res.status(202).json({
                             "message": "user updated successfully",
@@ -129,46 +126,41 @@ module.exports = {
                 "message": "Incomplete request. All fields are mandatory for update",
             });
         }
-
-
     },
 
     partialDetailUpdateController: function (req, res, next) {
         const userId = req.params.id;
         const reqBody = req.body;
         (async () => {
-            const data = await userService.partialDetailUpdateService(userId, reqBody);
             try {
+                const data = await userService.partialDetailUpdateService(Number.parseInt(userId), reqBody);
                 if (data.message == "success") {
                     res.status(202).json({
                         "message": "partial data updated successfully",
-                        "user": data.user
                     })
                 }
-            } catch (error) {
-                if (data.message == "error") {
+            } catch (err) {
+                if (err.message == "error") {
                     console.log("error in db")
                     res.status(400).json({
-                        "message": "Bad request",
-
+                        "message": "Bad request"
                     })
                 }
             }
         })().catch((error) => {
-            console.log(error + "error in async ")
+            console.log(error)
+            console.log("error in async ")
             res.status(400).json({
                 "message": "Bad request",
-                "user": data.user
             })
         })
-
     },
 
     deleteUserController: function (req, res, next) {
         const id = req.params.id;
         (async () => {
             try {
-                const data = await userService.deleteUserService(id);
+                const data = await userService.deleteUserService(Number.parseInt(id));
                 if (data.message == "success") {
                     res.status(200).json({
                         "message": "user deleted successfully",
@@ -204,18 +196,16 @@ module.exports = {
         if ((filesObject.hasOwnProperty('image')) && (filesObject.hasOwnProperty('images')) && (filesObject.hasOwnProperty('resume'))) {
             (async () => {
                 try {
-                    const data = await userService.uploadUserImageService(userId, filesObject);
+                    const data = await userService.uploadUserImageService(Number.parseInt(userId), filesObject);
                     if (data.message == "success") {
                         res.status(200).json({
                             "message": "user Detail uploaded successfully"
-
                         });
                     }
                 } catch (err) {
                     if (err.message == "error") {
                         res.status(401).json({
                             "message": "some error occured.user id not correct"
-
                         });
                     }
                 }
@@ -227,22 +217,26 @@ module.exports = {
                 "message": "All fields are mandatory"
             });
         }
-
-
     },
 
     getImgController: function (req, res, next) {
         const userId = req.query.id;
         (async () => {
             try {
-                const data = await userService.getImgService(userId)
-                res.setHeader('Content-Type', 'image/jpeg');
+                const data = await userService.getImgService(Number.parseInt(userId))
+
                 if (data.message == "success") {
+                    res.setHeader('Content-Type', 'image/jpeg');
                     res.sendFile(path.dirname(__dirname) + "/uploads/" + data.fileName, (err) => {
                         if (err) {
                             throw err;
                         }
                         console.log("Success")
+                    });
+                } else if (data.message == "error") {
+
+                    res.status(401).json({
+                        "message": "user id  not found",
                     });
                 }
             }
@@ -262,18 +256,23 @@ module.exports = {
 
     getResumeController: function (req, res, next) {
         const userId = req.query.id;
-        (async()=>{
+        (async () => {
             try {
-                const data = await userService.dowloadResumeService(userId)
+                const data = await userService.dowloadResumeService(Number.parseInt(userId))
                 if (data.message == "success") {
                     res.set('Content-Type', 'application/pdf');
                     res.download(path.dirname(__dirname) + "/uploads/" + data.fileName, (err) => {
                         if (err) {
                             console.log(err);
                             throw err;
-                        }  
+                        }
                     })
-                   console.log("pdf download") 
+                    console.log("pdf download")
+                }
+                else if (data.message == "error") {
+                    res.status(401).json({
+                        "message": "user id  not found",
+                    });
                 }
             } catch (data) {
                 if (data.message == "error") {
@@ -282,10 +281,10 @@ module.exports = {
                     });
                 }
             }
-        })().catch((err)=>{
+        })().catch((err) => {
             console.log(err)
             console.log("inside async");
-            
+
         })
     }
 }

@@ -1,8 +1,8 @@
-const { connection } = require('../utility/connection');
+const { connection } = require('../utility/conn_mysql');
 
 
 let userDao = {
-    userData: [{ userId: 99, userName: "Shivang", userAge: 22, useEmail: "as@email.com" },
+    userData: [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com" },
     { userId: 90, userName: "Devyani", userAge: 25, userEmail: "de@email.com" }],
     userDetail: [{
         id: 1,
