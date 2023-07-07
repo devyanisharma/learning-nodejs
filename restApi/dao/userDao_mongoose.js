@@ -37,35 +37,27 @@ let userDao = {
 
     postUserData: function (name, age, email) {
         return new Promise((resolve, reject) => {
-            let count = [];
             (async () => {
                 try {
                     //setting userId
                     const count = await Counters.find();
                     let userId = count[0].id;
                     console.log("userId",userId)
-
                     //inserting user
-                   
                     const insertResult = new UserModel({ userName: name, userAge: age, userEmail: email, createdDate: Date.now(), modifiedDate: Date.now(), userId: userId });
                     await insertResult.save();
+                    console.log("insertResult",insertResult)
                     const user = { userName: name, userAge: age, userEmail: email, createdDate: Date.now(), modifiedDate: Date.now(), userId: userId }
-                    console.log(user)
-                    userId = userId + 1
-                    const update = await counters.updateOne({}, { $set: { id: userId } });
-
-                    if (insertResult.acknowledged) {
+                    userId = userId + 1;
+                    const update = await Counters.updateOne({}, { $set: { id: userId } });
+                    console.log("update",update)
+                    
                         const data = {
                             "message": "success",
                             "user": user
                         }
                         return resolve(data);
-                    } else {
-                        const data = {
-                            "message": "error. something while inserting data. "
-                        }
-                        return reject(data);
-                    }
+                 
 
                 } catch (error) {
                     console.log(error)
@@ -86,8 +78,7 @@ let userDao = {
         return new Promise((resolve, reject) => {
             (async () => {
                 try {
-                    const collection = await db.db.collection('user');
-                    const result = await collection.updateOne({ userId: id }, { $set: { userName: name, userAge: age, userEmail: email, modifiedDate: Date.now() } })
+                    const result = await UserModel.updateOne({ userId: id }, { $set: { userName: name, userAge: age, userEmail: email, modifiedDate: Date.now() } })
                     console.log({ userName: name, userAge: age, userEmail: email, modifiedDate: Date.now() }, id);
                     if (result.modifiedCount > 0) {
                         const data = {
@@ -121,8 +112,8 @@ let userDao = {
             patchObject.modifiedDate = Date.now();
             (async () => {
                 try {
-                    const collection = await db.db.collection('user');
-                    const result = await collection.updateOne({ userId: userId }, { $set: patchObject });
+                   
+                    const result = await UserModel.updateOne({ userId: userId }, { $set: patchObject });
                     console.log(result)
                     if (result.modifiedCount > 0) {
                         const data = {
@@ -153,8 +144,7 @@ let userDao = {
         return new Promise((resolve, reject) => {
             (async () => {
                 try {
-                    const collection = await db.db.collection('user');
-                    const result = await collection.deleteOne({ userId: id });
+                    const result = await UserModel.deleteOne({ userId: id });
                     console.log(result)
                     if (result.deletedCount > 0) {
                         const data = {
@@ -196,8 +186,8 @@ let userDao = {
             console.log(values);
             (async () => {
                 try {
-                    const collection = await db.db.collection('user');
-                    const result = await collection.updateOne({ userId: userId }, { $set: { userProfile: files.image[0].filename, userImages: JSON.stringify(images), userResume: files.resume[0].filename } })
+                    
+                    const result = await UserModel.updateOne({ userId: userId }, { $set: { userProfile: files.image[0].filename, userImages: JSON.stringify(images), userResume: files.resume[0].filename } })
                     console.log(result);
                     if (result.modifiedCount > 0) {
                         data = { "message": "success" }
@@ -225,20 +215,21 @@ let userDao = {
         return new Promise((resolve, reject) => {
             (async () => {
                 try {
-                    const collection = await db.db.collection('user');
-                    const result = await collection.findOne({ userId: userId });
-                    console.log(result);
-                    if (result != null) {
+                    const result = await UserModel.findOne({ userId: userId });
+                    //console.log(result);
+                    console.log(result == null || result.userProfile === undefined)
+                    if (result == null || result.userProfile === undefined) {
+                        const data = {
+                            "message": "error",
+                        }
+                        return resolve(data);
+                    } else {
                         const data = {
                             "message": "success",
                             "fileName": result.userProfile
                         }
                         return resolve(data);
-                    } else {
-                        const data = {
-                            "message": "error",
-                        }
-                        return resolve(data);
+                       
                     }
                 } catch (err) {
                     console.log(err)
@@ -260,18 +251,19 @@ let userDao = {
         return new Promise((resolve, reject) => {
             (async () => {
                 try {
-                    const collection = await db.db.collection('user');
-                    const result = await collection.findOne({ userId: userId });
+                    
+                    const result = await UserModel.findOne({ userId: userId });
                     console.log(result);
-                    if (result != null) {
+                    if (result == null || result.userResume === undefined) {
+                        const data = {
+                            "message": "error",
+                        }
+                        return resolve(data);
+                        
+                    } else {
                         const data = {
                             "message": "success",
                             "fileName": result.userResume
-                        }
-                        return resolve(data);
-                    } else {
-                        const data = {
-                            "message": "error",
                         }
                         return resolve(data);
                     }

@@ -257,9 +257,6 @@ let userDao = {
        })
     }
 
-
-
-
 }
 
 function userCheckFunction(userId) {

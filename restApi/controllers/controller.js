@@ -236,7 +236,7 @@ module.exports = {
                 } else if (data.message == "error") {
 
                     res.status(401).json({
-                        "message": "user id  not found",
+                        "message": "data  not found",
                     });
                 }
             }
@@ -271,7 +271,7 @@ module.exports = {
                 }
                 else if (data.message == "error") {
                     res.status(401).json({
-                        "message": "user id  not found",
+                        "message": "data not found",
                     });
                 }
             } catch (data) {
