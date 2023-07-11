@@ -3,6 +3,24 @@ const {userDetail} = require('../dao/datastore.js');
 const multer = require('multer')
 
 module.exports = {
+    registerValidation:function(req,res,next){
+        console.log(req.body);
+        const firstname  = req.body.firstname;
+        const lastname = req.body.lastname 
+        const phonenumber = req.body.Number 
+        const password = req.body.password
+        const confirmPassword = req.body.confirmPassword;
+        const email = req.body.email
+        console.log(password == confirmPassword);
+        if(firstname.length >3 && lastname.length >3 && email.includes('.') && email.includes('@')
+        && password.length >= 6 && (password == confirmPassword)){
+            next();
+        }else{
+            res.status(401).json({"message":"validation not matched"})
+        }
+
+    },
+    
     patchValidationMiddleware:function(req,res,next){
         const userId = req.params.id;
         let originalUser = userData[0]

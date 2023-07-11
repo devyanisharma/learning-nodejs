@@ -3,10 +3,8 @@ const { UserModel ,Counters} = require('../utility/mongoose_models');
 
 let userDao = {
 
-    getAllUserData: function () {
-        return new Promise((resolve, reject) => {
-            (async () => {
-                try {
+    getAllUserData: async function () {
+              try {
                     const result = await UserModel.find();
                     console.log(result);
                     if (result.length >= 1) {
@@ -14,25 +12,22 @@ let userDao = {
                             "message": "success",
                             "user": result
                         }
-                        return resolve(data)
+                        return data;
                     } else {
                         const data = {
                             "message": "success",
                             "user": result
                         }
-                        return resolve(data)
+                        return data;
                     }
                 } catch {
                     const data = {
                         "message": "error"
                     }
                     console.log("inside catch");
-                    return reject(data)
+                    return data;
                 }
-            })().catch((error) => {
-                console.log("inside error of asyn catch")
-            })
-        })
+          
     },
 
     postUserData: function (name, age, email) {

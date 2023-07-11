@@ -1,12 +1,74 @@
 //const { userData, userDetail } = require('../dao/datastore.js');
 //const { userData, userDetail } = require('../dao/userDao.js');
 //const userDao = require('../dao/userdao_mongo.js');
+const userDao = require('../dao/userDao_mysql.js');
 const userService = require('../services/service.js');
 const path = require('path');
 
 
 
 module.exports = {
+    registerUser: function(req,res,next){
+        (async()=>{ 
+            try{
+                const firstname  = req.body.firstname;
+                const lastname = req.body.lastname 
+                const phonenumber = req.body.phonenumber; 
+                const password = req.body.password
+                const email = req.body.email
+                console.log("number " , phonenumber)
+                const data = await userService.registerUserService(firstname,lastname,phonenumber,password,email);
+                if(data.message=="success"){
+                    res.status(201).json({
+                        "message":"user registered successfully"
+                    })
+                }
+            }catch(err){
+                console.log("error-",err);
+                res.status(400).json({
+                    "message":err.message
+                })
+            }
+            
+
+        })().catch((error)=>{
+            console.log("in async catch - " + error);
+                return res.status(401).json({
+                    "message": "something went wrong"
+                });
+
+        })
+
+    
+    },
+
+    loginController:function(req,res,next){
+        (async ()=>{
+            try{
+                const email = req.body.email;
+                const password = req.body.password;
+                const data = await userService.loginUserService(email,password);
+
+              if(data.message=="success"){
+                    res.status(201).json({
+                        "message":data.msg
+                    })
+                }
+            }catch(err){
+                console.log("error-",err);
+                res.status(400).json({
+                    "message":err.msg
+                })
+            }
+
+        })().catch((error)=>{
+            console.log("in async catch - " + error);
+                return res.status(401).json({
+                    "message": "something went wrong"
+                });
+        })
+
+    },
     getAllUsersController: function (req, res, next) {
         (async () => {
             try {
@@ -59,6 +121,7 @@ module.exports = {
     },
 
     postUserController: function (req, res, next) {
+        console.log(req.body);
         const name = req.body.name;
         const age = req.body.age;
         const email = req.body.email;
@@ -74,7 +137,7 @@ module.exports = {
                         });
                     }
                 } catch (error) {
-                    console.log(" reject - db error " + error);
+                    console.log(" reject - db error " , error);
                     return res.status(401).json(error);
                 }
             })().catch((error) => {

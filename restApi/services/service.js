@@ -5,6 +5,14 @@ const userDao = require('../dao/userDao_mysql');
 
 module.exports =
 {
+    registerUserService: async function(firstname,lastname,phonenumber,password,email){
+        return await userDao.registerUserData(firstname,lastname,phonenumber,password,email);
+    },
+
+    loginUserService: async function(email,password){
+        return await userDao.loginUserData(email,password);
+    },
+
     getAllUserService: async function () {
         return await userDao.getAllUserData();
     },
