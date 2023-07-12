@@ -48,14 +48,21 @@ module.exports = {
                 const email = req.body.email;
                 const password = req.body.password;
                 const data = await userService.loginUserService(email,password);
-
+                let users = {
+                    email:email,
+                    password:password
+                }
+              
               if(data.message=="success"){
+                res.cookie("userData",users,{expire: 3000 + Date.now()})
                     res.status(201).json({
-                        "message":data.msg
+                        "message":data.msg,
+                        
                     })
                 }
             }catch(err){
                 console.log("error-",err);
+
                 res.status(400).json({
                     "message":err.msg
                 })
@@ -69,6 +76,14 @@ module.exports = {
         })
 
     },
+
+    logoutController:function(req,res,next){
+        res.clearCookie('userData');
+        res.status(200).json({"message":"user logout successfully"})
+        
+    },
+
+    
     getAllUsersController: function (req, res, next) {
         (async () => {
             try {

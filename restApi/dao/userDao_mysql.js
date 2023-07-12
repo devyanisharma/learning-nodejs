@@ -18,17 +18,7 @@ let userDao = {
         try{
             encryptPwdFunction(password).then((data)=>{
                 encryptPwd = data;
-             }).catch((error)=>{
-                console.log("some error in encryption",error)
-                const data = {
-                    "message": "error. something went wrong while encryption. "
-                }
-                return reject(data)
-             })
-        }catch(error){
-            console.log("error in catch block", error)
-        }
-            const query = 'INSERT INTO `userInfo` (firstname,lastname,email,phonenumber,password,createdDate,modifiedDate) Values (?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)'
+                const query = 'INSERT INTO `userInfo` (firstname,lastname,email,phonenumber,password,createdDate,modifiedDate) Values (?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)'
             connection.query(query, [firstname, lastname, email, phonenumber, encryptPwd], function (err, result, fields) {
                 if (err) {
                     console.log("error in stack trace", err)
@@ -44,6 +34,17 @@ let userDao = {
                     return resolve(data);
                 }
             })
+             }).catch((error)=>{
+                console.log("some error in encryption",error)
+                const data = {
+                    "message": "error. something went wrong while encryption. "
+                }
+                return reject(data)
+             })
+        }catch(error){
+            console.log("error in catch block", error)
+        }
+            
 
         })
 
@@ -64,9 +65,9 @@ let userDao = {
 
                 if (result.length > 0) {
                     const dbPwd = result[0].password;
-                    const pwdValidate = decryptPwdFunction(dbPwd,password);
-                    console.log("pwdvalidate",pwdValidate)
-                     if (pwdValidate) {
+                   try{
+                        decryptPwdFunction(dbPwd,password).then((data)=>{
+                     if (data) {
                         const data = {
                             "message": "success",
                             "msg": "user logged in successfully"
@@ -79,6 +80,14 @@ let userDao = {
                         }
                         return reject(data)
                     }
+                        }).catch((error)=>{
+                            console.log("error",error);
+                        })
+                    }catch(error){
+                        console.log(error)
+                    }
+                   
+                    
                 } else {
                     const data = {
                         "message": "error",
@@ -104,7 +113,7 @@ let userDao = {
                     return reject(data)
 
                 } else {
-                    console.log(result);
+                    //console.log(result);
                     if (result.length >= 1) {
                         const data = {
                             "message": "success",
@@ -382,14 +391,19 @@ function encryptPwdFunction(password) {
 }
 
 function decryptPwdFunction(dbpwd,password){
-    const match = bcrypt.compare(password,dbpwd,function(err,result){
-        if(err){
-            console.log("error while matching password", err)
-        }
-        console.log("result compare pwd", result)
+    return new Promise((resolve,reject)=>{
+        bcrypt.compare(password,dbpwd,function(err,result){
+            if(err){
+                console.log("error while matching password", err)
+                reject(err)
+            }
+            console.log("result compare pwd", result)
+            resolve(result);
+            
+        })
         
     })
-    return match;
+    
 
 }
 module.exports = userDao;

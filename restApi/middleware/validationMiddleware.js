@@ -20,6 +20,29 @@ module.exports = {
         }
 
     },
+
+    cookieValidation:function(req,res,next){
+        console.log("cookie", req.cookies);
+        if(req.cookies.hasOwnProperty('userData')){
+            if(req.cookies.userData.hasOwnProperty('email')&& req.cookies.userData.hasOwnProperty('password'))
+            {
+              console.log("authenticated")  
+              next();
+            }
+            else{
+                console.log("un authenticated") 
+                res.status(401).json({
+                    "message":"unauthorized"
+                })
+            }
+        }else{
+            res.status(440).json({
+                "message":"session expired"
+            })
+        }
+        
+       
+    },
     
     patchValidationMiddleware:function(req,res,next){
         const userId = req.params.id;
