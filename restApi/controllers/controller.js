@@ -4,86 +4,94 @@
 const userDao = require('../dao/userDao_mysql.js');
 const userService = require('../services/service.js');
 const path = require('path');
-
+const jwt = require('jsonwebtoken');
 
 
 module.exports = {
-    registerUser: function(req,res,next){
-        (async()=>{ 
-            try{
-                const firstname  = req.body.firstname;
-                const lastname = req.body.lastname 
-                const phonenumber = req.body.phonenumber; 
+    registerUser: function (req, res, next) {
+        (async () => {
+            try {
+                const firstname = req.body.firstname;
+                const lastname = req.body.lastname
+                const phonenumber = req.body.phonenumber;
                 const password = req.body.password
                 const email = req.body.email
-                console.log("number " , phonenumber)
-                const data = await userService.registerUserService(firstname,lastname,phonenumber,password,email);
-                if(data.message=="success"){
+                console.log("number ", phonenumber)
+                const data = await userService.registerUserService(firstname, lastname, phonenumber, password, email);
+                if (data.message == "success") {
                     res.status(201).json({
-                        "message":"user registered successfully"
+                        "message": "user registered successfully"
                     })
                 }
-            }catch(err){
-                console.log("error-",err);
+            } catch (err) {
+                console.log("error-", err);
                 res.status(400).json({
-                    "message":err.message
+                    "message": err.message
                 })
             }
-            
 
-        })().catch((error)=>{
+
+        })().catch((error) => {
             console.log("in async catch - " + error);
-                return res.status(401).json({
-                    "message": "something went wrong"
-                });
+            return res.status(401).json({
+                "message": "something went wrong"
+            });
 
         })
 
-    
+
     },
 
-    loginController:function(req,res,next){
-        (async ()=>{
-            try{
+    loginController: function (req, res, next) {
+        (async () => {
+            try {
                 const email = req.body.email;
                 const password = req.body.password;
-                const data = await userService.loginUserService(email,password);
+                const data = await userService.loginUserService(email, password);
                 let users = {
-                    email:email,
-                    password:password
+                    email: email,
                 }
-              
-              if(data.message=="success"){
-                res.cookie("userData",users,{expire: 3000 + Date.now()})
-                    res.status(201).json({
-                        "message":data.msg,
-                        
-                    })
+                if (data.message == "success") {
+                    //const token =  jwt.sign({ user: users }, "PrivateKey");
+                      // console.log("jwt token",token)
+                        res.cookie("userData",users,{maxAge:30000});
+                        console.log("cookie in login",req.cookies);
+                        res.status(201).json({
+                            "message": data.msg,
+                            "cookie": req.cookies
+                        });
+                    
+                }else{
+                    res.status(401).json({
+                        "message": "unauthorization",
+                        "cookie": req.cookies
+                    });
+
                 }
-            }catch(err){
-                console.log("error-",err);
+            } catch (err) {
+                console.log("error-", err);
 
                 res.status(400).json({
-                    "message":err.msg
+                    "message": err.msg
                 })
             }
 
-        })().catch((error)=>{
+        })().catch((error) => {
             console.log("in async catch - " + error);
-                return res.status(401).json({
-                    "message": "something went wrong"
-                });
+            return res.status(401).json({
+                "message": "something went wrong"
+            });
         })
 
     },
 
-    logoutController:function(req,res,next){
+    logoutController: function (req, res, next) {
         res.clearCookie('userData');
-        res.status(200).json({"message":"user logout successfully"})
-        
+        res.status(200).json({ "message": "user logout successfully" })
+
     },
 
-    
+
     getAllUsersController: function (req, res, next) {
         (async () => {
             try {
@@ -152,7 +160,7 @@ module.exports = {
                         });
                     }
                 } catch (error) {
-                    console.log(" reject - db error " , error);
+                    console.log(" reject - db error ", error);
                     return res.status(401).json(error);
                 }
             })().catch((error) => {

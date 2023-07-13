@@ -1,6 +1,7 @@
 const { userData } = require('../dao/userDao_mysql');
 const {userDetail} = require('../dao/datastore.js');
 const multer = require('multer')
+const jwt = require('jsonwebtoken');
 
 module.exports = {
     registerValidation:function(req,res,next){
@@ -21,10 +22,19 @@ module.exports = {
 
     },
 
+   
+
     cookieValidation:function(req,res,next){
         console.log("cookie", req.cookies);
-        if(req.cookies.hasOwnProperty('userData')){
-            if(req.cookies.userData.hasOwnProperty('email')&& req.cookies.userData.hasOwnProperty('password'))
+        
+         if(req.cookies.hasOwnProperty('userData')){
+          const decoded  = req.cookies.userData;//in case of cookie
+          
+        //    const deco = jwt.verify(req.cookies.userData,"PrivateKey");
+        //const decoded = deco.user;
+        //    console.log("decoded",decoded)
+         
+            if(decoded.hasOwnProperty('email'))
             {
               console.log("authenticated")  
               next();
@@ -36,6 +46,7 @@ module.exports = {
                 })
             }
         }else{
+            
             res.status(440).json({
                 "message":"session expired"
             })

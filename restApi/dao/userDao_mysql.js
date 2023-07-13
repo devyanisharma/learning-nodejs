@@ -370,20 +370,20 @@ function userCheckFunction(userId) {
 }
 function encryptPwdFunction(password) {
     return new Promise((resolve,reject)=>{
-        console.log("encrypt password methods")
+        //console.log("encrypt password methods")
         const saltRounds = 10;
         bcrypt.genSalt(saltRounds, function (err, salt) {
             if (err) {
                 console.log("error in salt", err);
                 return reject("error")
             }
-            console.log("salt-", salt)
+           // console.log("salt-", salt)
             bcrypt.hash(password ,salt,function (error, hash) {
                 if (error) {
                     console.log("error in hash-", error)
                     return reject("eror")
                 }
-                console.log("hash- ", hash)
+               // console.log("hash- ", hash)
                 return resolve(hash);
             })
     })
@@ -397,7 +397,7 @@ function decryptPwdFunction(dbpwd,password){
                 console.log("error while matching password", err)
                 reject(err)
             }
-            console.log("result compare pwd", result)
+           // console.log("result compare pwd", result)
             resolve(result);
             
         })
