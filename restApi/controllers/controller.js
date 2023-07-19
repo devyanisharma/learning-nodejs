@@ -4,8 +4,7 @@
 const userDao = require('../dao/userDao_mysql.js');
 const userService = require('../services/service.js');
 const path = require('path');
-const jwt = require('jsonwebtoken');
-
+const session =  require('../middleware/session.js')
 
 module.exports = {
     registerUser: function (req, res, next) {
@@ -47,15 +46,19 @@ module.exports = {
             try {
                 const email = req.body.email;
                 const password = req.body.password;
-                const data = await userService.loginUserService(email, password);
-                let users = {
-                    email: email,
+                if(!email||!password){
+                    return res.status(400).json({
+                        "message": "BAD Request"
+                    }); 
                 }
-                if (data.message == "success") {
+                const user = {email:email}
+                const data = await userService.loginUserService(email, password);
+                if (data.message == "success") {   
+                   req.session.user = user;
                     //const token =  jwt.sign({ user: users }, "PrivateKey");
                       // console.log("jwt token",token)
-                        res.cookie("userData",users,{maxAge:30000});
-                        console.log("cookie in login",req.cookies);
+                       // res.cookie("userData",users,{maxAge:30000});
+                       // console.log("cookie in login",req.cookies);
                         res.status(201).json({
                             "message": data.msg,
                             "cookie": req.cookies
