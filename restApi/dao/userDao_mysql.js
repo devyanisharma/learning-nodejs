@@ -1,5 +1,7 @@
 const { connection } = require('../utility/conn_mysql');
 const bcrypt = require("bcrypt")
+const passport = require('passport')
+const LocalStrategy = require('passport-local').Strategy
 
 let userDao = {
     userData: [{ userId: 99, userName: "Shivang", userAge: 22, userEmail: "as@email.com" },
@@ -49,59 +51,61 @@ let userDao = {
         })
 
     },
-    loginUserData: function (email, password) {
-        return new Promise((resolve, reject) => {
-            const query = 'select password from `userInfo` where email = ?';
-            connection.query(query, [email], function (err, result, fields) {
-                if (err) {
-                    console.log("error", err);
-                    const data = {
-                        "message": "error",
-                        "msg": "db error"
-                    }
-                    return reject(data)
-                }
-                console.log(result);
+  
 
-                if (result.length > 0) {
-                    const dbPwd = result[0].password;
-                   try{
-                        decryptPwdFunction(dbPwd,password).then((data)=>{
-                     if (data) {
-                        const data = {
-                            "message": "success",
-                            "msg": "user logged in successfully"
-                        }
-                        resolve(data)
-                    } else {
-                        const data = {
-                            "message": "error",
-                            "msg": "incorrect password "
-                        }
-                        return reject(data)
-                    }
-                        }).catch((error)=>{
-                            console.log("error",error);
-                        })
-                    }catch(error){
-                        console.log(error)
-                    }
+    // loginUserData: function (email, password) {
+    //     return new Promise((resolve, reject) => {
+    //         const query = 'select password from `userInfo` where email = ?';
+    //         connection.query(query, [email], function (err, result, fields) {
+    //             if (err) {
+    //                 console.log("error", err);
+    //                 const data = {
+    //                     "message": "error",
+    //                     "msg": "db error"
+    //                 }
+    //                 return reject(data)
+    //             }
+    //             console.log(result);
+
+    //             if (result.length > 0) {
+    //                 const dbPwd = result[0].password;
+    //                try{
+    //                     decryptPwdFunction(dbPwd,password).then((data)=>{
+    //                  if (data) {
+    //                     const data = {
+    //                         "message": "success",
+    //                         "msg": "user logged in successfully"
+    //                     }
+    //                     resolve(data)
+    //                 } else {
+    //                     const data = {
+    //                         "message": "error",
+    //                         "msg": "incorrect password "
+    //                     }
+    //                     return reject(data)
+    //                 }
+    //                     }).catch((error)=>{
+    //                         console.log("error",error);
+    //                     })
+    //                 }catch(error){
+    //                     console.log(error)
+    //                 }
                    
                     
-                } else {
-                    const data = {
-                        "message": "error",
-                        "msg": "user not found"
-                    }
-                    reject(data)
-                }
+    //             } else {
+    //                 const data = {
+    //                     "message": "error",
+    //                     "msg": "user not found"
+    //                 }
+    //                 reject(data)
+    //             }
 
 
-            })
+    //         })
 
-        })
+    //     })
 
-    },
+    // },
     getAllUserData: function () {
         return new Promise((resolve, reject) => {
             connection.query('SELECT * FROM `user`', function (err, result, fields) {

@@ -1,4 +1,3 @@
-const {connection} = require('../utility/conn_mongoose');
 const {Schema} = require("mongoose");
 const userSchema = new Schema({
     userName:String,

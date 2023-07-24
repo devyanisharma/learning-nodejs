@@ -4,10 +4,9 @@ const router = express.Router();
 const userController = require('../controllers/controller.js')
 const validationMiddleware = require('../middleware/validationMiddleware.js')
 
-
-router.post('/register',validationMiddleware.registerValidation,userController.registerUser);
-router.post('/login',userController.loginController);
-router.use(validationMiddleware.authenticate)
+//router.post('/register',validationMiddleware.registerValidation,userController.registerUser);
+//router.post('/login',userController.loginController);
+//router.use(authenticateMiddleware.authenticate)
 router.post('/logout',userController.logoutController);
 router.get('/',userController.getAllUsersController);
 router.post('/',userController.postUserController);
@@ -18,7 +17,10 @@ const upload = validationMiddleware.configureMulterMiddleware();
 router.post('/userProfile/:id',validationMiddleware.imageValidationMiddleware, upload, userController.postProfileDetailsController);
 router.get('/getImg',userController.getImgController)
 router.get('/getResume',userController.getResumeController)
-
+router.use((err, req, res, next) => {
+    console.error(err.stack)
+    res.status(500).send(err.message)
+  })
 
 module.exports = router;
 

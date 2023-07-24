@@ -4,9 +4,12 @@
 const userDao = require('../dao/userDao_mysql.js');
 const userService = require('../services/service.js');
 const path = require('path');
-const session =  require('../middleware/session.js')
+const session = require('../middleware/session.js')
+const {connection} = require('../utility/conn_mysql.js')
+const { genPassword, userExists, validPassword, isAuth, authenticate } = require('../middleware/authenticate.js')
 
 module.exports = {
+
     registerUser: function (req, res, next) {
         (async () => {
             try {
@@ -28,8 +31,6 @@ module.exports = {
                     "message": err.message
                 })
             }
-
-
         })().catch((error) => {
             console.log("in async catch - " + error);
             return res.status(401).json({
@@ -37,8 +38,48 @@ module.exports = {
             });
 
         })
+    },
+    //passport controllers
+    home: function (req, res, next) {
+        console.log("inside home");
+        res.render('home')
+    },
+    register: function (req, res, next) {
+        console.log("req body",req.body)
+        const username = req.body.username;
+        const password = req.body.password;
+        const email = req.body.email;
+        console.log(password);
+        let salt
+        let hash
+        (async () => {
+            try {
+                const saltAndHash = await genPassword(req.body.password);
+                
+                salt = saltAndHash.salt;
+                hash = saltAndHash.hash;
+                console.log("hash and salt",saltAndHash)
+                connection.query('Insert into userInfo(username,email,hash,salt,createdDate,modifiedDate) values(?,?,?,?,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ', [username, email, hash, salt], function (error, results, fields) {
+                    if (error) {
+                        console.log("Error", error);
+                    } else {
+                        console.log("user registered successfulyy");
+                        res.redirect('/login');
+                    }
+                });
+            } catch (error) {
+                console.log(error)
+            }
+        })().catch((error) => {
+            console.log(error)
+        })
+       
 
+        
+    },
 
+    login: function (req, res, next) {
+        res.render('index')
     },
 
     loginController: function (req, res, next) {
@@ -46,56 +87,59 @@ module.exports = {
             try {
                 const email = req.body.email;
                 const password = req.body.password;
-                if(!email||!password){
+                if (!email || !password) {
                     return res.status(400).json({
                         "message": "BAD Request"
-                    }); 
+                    });
                 }
-                const user = {email:email}
+                const user = { email: email }
                 const data = await userService.loginUserService(email, password);
-                if (data.message == "success") {   
-                   req.session.user = user;
+                if (data.message == "success") {
+                    req.session.user = user;
                     //const token =  jwt.sign({ user: users }, "PrivateKey");
-                      // console.log("jwt token",token)
-                       // res.cookie("userData",users,{maxAge:30000});
-                       // console.log("cookie in login",req.cookies);
-                        res.status(201).json({
-                            "message": data.msg,
-                            "cookie": req.cookies
-                        });
-                    
-                }else{
+                    // console.log("jwt token",token)
+                    // res.cookie("userData",users,{maxAge:30000});
+                    console.log("cookie in login", req.cookies);
+                    res.status(201).json({
+                        "message": data.msg,
+                        "cookie": req.cookies
+                    });
+                } else {
                     res.status(401).json({
                         "message": "unauthorization",
                         "cookie": req.cookies
                     });
-
                 }
             } catch (err) {
                 console.log("error-", err);
-
                 res.status(400).json({
                     "message": err.msg
                 })
             }
-
         })().catch((error) => {
             console.log("in async catch - " + error);
             return res.status(401).json({
                 "message": "something went wrong"
             });
         })
-
     },
 
     logoutController: function (req, res, next) {
-        res.clearCookie('userData');
-        res.status(200).json({ "message": "user logout successfully" })
+        req.session.destroy(function (err) {
+            if (err) {
+                console.log(err.stack)
+                res.status(502).json({ "message": "some error occured" })
+            }
+            console.log(req.cookies)
+            res.clearCookie('sessionId');
+            res.status(200).json({ "message": "user logout successfully" })
+        })
 
     },
 
 
     getAllUsersController: function (req, res, next) {
+
         (async () => {
             try {
                 const data = await userService.getAllUserService();

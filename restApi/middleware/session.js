@@ -3,13 +3,12 @@ const {redisClient} = require('../utility/redis')
 
 const RedisStore = require('connect-redis').default;
 
-
 module.exports =  session({
         store: new RedisStore({client: redisClient}),
         secret: 'shhh',
         resave: false,
         saveUninitialized: false,
-        name:"session Id",
+        name:"sessionId",
         cookie: { 
           secure: false,
           httpOnly:true,
