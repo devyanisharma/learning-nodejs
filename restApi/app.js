@@ -1,10 +1,24 @@
 const express = require('express')
 var path = require('path');
+const fs = require('fs')
+const rfs = require('rotating-file-stream')
 const bodyParser = require('body-parser');
 const app = express();
 const cors = require('cors')
 app.use(express.json());
 app.use(cors())
+const morgan = require('morgan')
+
+
+const customFormat = 'date :date[web] method-:method url-:url status-:status response time-:response-time ms response-:res[content-length]';
+
+//const accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), { flags: 'a' });
+const accessLogStream = rfs.createStream('access.log', {
+  interval: '1d', // Rotate daily
+  path: path.join(__dirname, 'logs') // Folder where log files will be stored
+});
+
+app.use(morgan(customFormat, { stream: accessLogStream }));
 
 const cookieParser = require('cookie-parser')
 app.use(cookieParser())
